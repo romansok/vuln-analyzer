@@ -1,6 +1,6 @@
 ---
 name: vuln-analyzer
-description: Use when the user asks to scan for vulnerabilities, find CVEs, run grype, audit dependencies, or analyze security risk for a directory, container image, SBOM, PURL, or CPE. Runs the grype MCP scanner, ranks findings with grype's unified risk (falling back to CVSS and severity bucket), prints a top-5 markdown table inline, writes the full table to a timestamped report file when there are more than 5 findings, and dispatches the vulnerability-analyzer agent for each of the top 5 to produce a developer-readable analysis covering reachability, business impact, and remediation. Single entry point for "analyze the security of this codebase".
+description: Use when the user asks to scan a directory for vulnerabilities, find CVEs in a codebase, run grype on a project, or audit dependencies of a local repository. The skill scans local directories only — image refs, SBOMs, PURLs, and CPEs are rejected; for those, run grype directly or use the standalone vulnerability-analyzer agent with a specific advisory id. Ranks findings with grype's unified risk (falling back to CVSS and severity bucket), prints a top-5 markdown table inline, writes the full table to a timestamped report file when there are more than 5 findings, and dispatches the vulnerability-analyzer agent for each of the top 5 to produce a developer-readable analysis covering reachability, business impact, and remediation. Single entry point for "analyze the security of this codebase".
 ---
 
 # vuln-analyzer — orchestrator
@@ -66,29 +66,41 @@ among the tools available to you in this session, the scan can't run.
        Example: "analyze CVE-2024-1234".
   ```
 
-## Phase 1 — Resolve scan target
+## Phase 1 — Resolve scan target (directory only)
 
-Parse the user's prompt for a target. Accept any of:
+**This skill scans local directories only.** Other grype target types
+(container images, SBOM files, PURLs, CPEs) are out of scope — the
+purpose here is repository / codebase audits. For non-directory scans
+run grype directly, or use the standalone `vulnerability-analyzer`
+agent with a specific advisory id.
+
+Parse the user's prompt for a directory:
 - a filesystem path → prefix with `dir:` and resolve to absolute.
-- a `dir:`/`sbom:` scheme → use as-is.
-- a container image ref (`alpine:latest`, registry/org/image:tag).
-- a PURL (`pkg:npm/…`) or a CPE.
+- `dir:<path>` scheme → use as-is (resolve `<path>` to absolute).
 
-If no target was given AND the user's cwd looks like a project root
+If no directory was given AND the user's cwd looks like a project root
 (presence of `package.json`, `go.mod`, `requirements.txt`,
 `Cargo.toml`, `Gemfile`, `pom.xml`, …): use `dir:$(pwd)`.
 
-**CHECKPOINT 1 — target resolved.**
-- ✅ A target string is in hand → proceed to Phase 2.
-- ❌ Target ambiguous (no target in prompt **and** cwd doesn't look
-  like a project) → **ask once**: *"What should I scan? (a path, an
-  image ref, an SBOM, a PURL, or a CPE)"* — do not guess.
+**CHECKPOINT 1 — directory target resolved.**
+- ✅ A `dir:<abs-path>` target is in hand → proceed to Phase 2.
+- ❌ Target is a non-directory (image ref like `alpine:latest` or
+  `registry/org/image:tag`, an `sbom:` path, a PURL like
+  `pkg:npm/...`, a CPE) → STOP with exactly this message:
 
-Set `<ts>` now, before scanning. Echo back to the user the target
+  ```
+  This skill scans local directories only. For image / SBOM / PURL / CPE scans, run grype directly. For a specific advisory id, ask the vulnerability-analyzer agent directly: "analyze CVE-..." or "analyze GHSA-...".
+  ```
+
+- ❌ Target ambiguous (no directory in prompt **and** cwd doesn't
+  look like a project) → **ask once**: *"Which directory should I
+  scan?"* — do not guess.
+
+Set `<ts>` now, before scanning. Echo back to the user the directory
 you're about to scan so they can correct if needed:
 
 ```
-Scanning: <resolved-target>
+Scanning: <resolved-dir-target>
 ```
 
 ## Phase 2 — Scan
@@ -185,7 +197,7 @@ in order:
        Vulnerability id: <VULN_ID>
        Per-vuln context file: <root>/.cache/vuln_<VULN_ID>.json
        Scan target (resolved): <resolved-target-from-Phase-1>
-       Project root for reachability search: <abs path of scan target if dir:, else "none">
+       Project root for reachability search: <abs path of the dir: scan target>     // always a real path; skill never passes "none"
        Return your final synthesis block (see references/output-templates.md
        "Lead-agent synthesis block"). The 3 sub-agents are yours to dispatch.
      >>>

@@ -29,9 +29,15 @@ produce one developer-readable report per vulnerability.
 
 2. Ask in plain English. Any of these will trigger the skill:
    - *"Scan /Users/me/repo for vulnerabilities."*
-   - *"Audit dependencies in this image: node:18-alpine."*
+   - *"Audit dependencies in this project."* (uses your cwd)
    - *"Run grype on /path/to/project."*
-   - *"Check the security of …"*
+   - *"Check the security of this codebase."*
+
+   The skill scans **local directories only.** If you pass an image
+   ref, SBOM, PURL, or CPE it's politely rejected with a pointer to
+   running grype directly. For a specific advisory id without
+   scanning, ask the `vulnerability-analyzer` agent directly instead
+   (see [Standalone analyzer](#standalone-analyzer) below).
 
 3. To analyze a single vulnerability standalone (no scan):
    - *"Analyze CVE-2023-32314."*
@@ -174,9 +180,14 @@ follows the same flow, but reachability has real source to grep.
   for installer commands.
 - **JSON stays out of context.** The full grype JSON is written to
   `.cache/` and only read via `jq` from Bash. The model never loads it.
-- **Reachability for image / SBOM / PURL targets** returns
-  `source-not-available` — there's no filesystem to grep. The
-  synthesis is still useful for context + remediation.
+- **Directory scans only.** The skill targets local directories
+  exclusively — image refs, SBOM files, PURLs, and CPEs are rejected
+  at Phase 1 with a pointer to running grype directly. The standalone
+  `vulnerability-analyzer` agent (invoked outside the skill) is the
+  way to analyze a specific advisory id without a scan.
+- **Reachability returns `source-not-available`** only in standalone
+  mode (the agent was invoked outside the skill with no project root).
+  Skill scans always have a real source tree.
 - **Filename spelling.** `vulnerabilites_report_<ts>.md` preserves the
   spelling from the original spec (the maintainer is aware
   "vulnerabilities" is the standard spelling).

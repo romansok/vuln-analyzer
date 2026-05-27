@@ -235,7 +235,8 @@ rm -rf ~/.cursor/skills/vuln-analyzer
 | `mcp__grype__scan` not available | Install the grype MCP server. Confirm with "list MCP tools". |
 | Skill doesn't show up | Restart the client. Check the install path matches your client (Claude Code vs Cursor). Filenames matter (case-sensitive on Linux). |
 | "Scanning: …" line never appears | The skill isn't routing — the user prompt may not match the description. Try the explicit phrasing: *"run the vuln-analyzer skill on this project"*. |
-| Reachability returns `source-not-available` for a dir scan | The skill passed `"none"` as project root. Verify the scan target was a `dir:` (not an image / SBOM / PURL). |
+| Reachability returns `source-not-available` from a skill scan | Should not happen — the skill always passes a real `dir:` to reachability. If you see this, the standalone analyzer agent ran instead of the skill (e.g., the user asked "analyze CVE-…" rather than "scan for vulnerabilities"). |
+| "This skill scans local directories only" rejection | You passed an image ref, SBOM, PURL, or CPE. Run grype directly, or use the standalone analyzer agent for a specific advisory id (e.g., "analyze CVE-2024-…"). |
 | Report file isn't written | Total matches ≤ 5 — by spec the file is only written when matches > 5. |
 | Filename `vulnerabilites_report_…` looks misspelled | Intentional — preserved verbatim from the spec. |
 
