@@ -1,8 +1,18 @@
 # Installing vuln-analyzer
 
 This package adds one **skill** and four **agents** to Claude Code or
-Cursor. Once installed, you can ask either tool to "scan for
-vulnerabilities" or "analyze CVE-…" and the skill+agents take over.
+Cursor. Once installed, your AI assistant can scan a codebase
+(`scan for vulnerabilities`) or analyze a single advisory id
+(`analyze CVE-…`) directly.
+
+The whole install is one command:
+
+```bash
+./install.sh                  # Claude Code, user-level (default)
+./install.sh --cursor         # Cursor, user-level
+./install.sh --project /path  # Claude Code, project-local at /path/.claude
+./install.sh --cursor --project /path   # Cursor, project-local at /path/.cursor
+```
 
 ---
 
@@ -19,22 +29,18 @@ A POSIX shell environment. Specifically:
 | Windows (WSL) | ✅ Use Claude Code / Cursor inside WSL. |
 | Windows (native cmd / PowerShell) | ⚠️ Not supported. Use WSL or git-bash. |
 
-The skill uses `jq` + `awk` + `bash` to extract data from the grype
-JSON. These are POSIX tools — they're standard on macOS / Linux / WSL
-but require a shim on bare Windows.
-
 ### Required binaries
 
 ```bash
-bash --version         # 3.2+; pre-installed on macOS/Linux/WSL
-date --version         # any (GNU or BSD); pre-installed
-python3 --version      # 3.8+; pre-installed on macOS/Linux/most WSL distros
+bash --version     # 3.2+; pre-installed on macOS / Linux / WSL
+date --version     # any (GNU or BSD); pre-installed
+python3 --version  # 3.8+; pre-installed on macOS / Linux / most WSL distros
 ```
 
-`jq` is **strongly recommended** but not strictly required — the SKILL
-ships with a Python 3 stdlib-only fallback at
-`.claude/skills/vuln-analyzer/references/jq-fallback.py` that implements
-the same operations with byte-identical output. Install jq if you can:
+`jq` is **strongly recommended** but not strictly required — the skill
+ships with a Python-stdlib-only fallback at
+`skills/vuln-analyzer/references/jq-fallback.py` that implements the
+same operations with byte-identical output. Install jq if you can:
 
 | OS | Install command |
 | --- | --- |
@@ -44,22 +50,20 @@ the same operations with byte-identical output. Install jq if you can:
 | Arch | `sudo pacman -S jq` |
 | Windows WSL | use the Linux command for your WSL distro |
 
-`awk` is needed only when the SKILL takes the jq path (the awk
-one-liner converts TSV to Markdown). It's pre-installed on every
-POSIX system. The Python fallback bundles this step internally — no
-awk needed when jq is absent.
+`awk` is needed only when `jq` is present (the awk one-liner converts
+TSV to Markdown). The Python fallback handles markdown internally —
+no awk needed when jq is absent.
 
 ### grype MCP server
 
-The skill calls a tool named `mcp__grype__scan`. You need the grype MCP
-server configured in your client.
+The skill calls a tool named `mcp__grype__scan`. You need the grype
+MCP server configured in your AI assistant.
 
 Install instructions:
 **https://github.com/romansok/grype-mcp/blob/main/README-MCP.md**
 
-Verify it's registered by asking Claude Code or Cursor: *"list available
-MCP tools"* — you should see `mcp__grype__scan` (plus `analyze` and
-`export`).
+Verify it's registered by asking your AI assistant: *"list available
+MCP tools"* — you should see `mcp__grype__scan`.
 
 ### Claude Code or Cursor
 
@@ -68,109 +72,114 @@ MCP tools"* — you should see `mcp__grype__scan` (plus `analyze` and
 
 ---
 
-## 2. Install into Claude Code
+## 2. Install
 
-You have two choices: project-local (the analyzer is available only
-inside one specific project) or user-level (available from every
-project).
-
-### Option A — User-level (recommended for most users)
-
-Drop the agents and skill into your home Claude config so they're
-available from any project.
+### Quick: user-level into Claude Code
 
 ```bash
-# from inside this package (vuln-analyzer/):
-mkdir -p ~/.claude/agents ~/.claude/skills
-cp .claude/agents/*.md ~/.claude/agents/
-cp -R .claude/skills/vuln-analyzer ~/.claude/skills/
+git clone https://github.com/romansok/vuln-analyzer.git
+cd vuln-analyzer
+./install.sh
 ```
 
-Restart Claude Code (`/exit`, then relaunch). Verify with:
+Output (target dir shown for confirmation):
 
 ```
-> list my skills
+Installing vuln-analyzer
+  tool:        claude
+  destination: /Users/you/.claude
+
+  ✓ copied 4 agents -> /Users/you/.claude/agents/
+  ✓ copied skill 'vuln-analyzer' -> /Users/you/.claude/skills/vuln-analyzer
+
+Done. Restart claude, then try:
+    analyze GHSA-whpj-8f3w-67p5
+    scan ~/some/repo for vulnerabilities
 ```
 
-You should see `vuln-analyzer` in the list, and the four agents
-(`vulnerability-analyzer`, `reachability-analyzer`, `context-analyzer`,
-`remediation-analyzer`) should show up in agent autocompletion.
+Restart Claude Code (`/exit`, then relaunch).
 
-### Option B — Project-local
-
-Useful when you want the skill version-controlled with a particular
-repo (so teammates pick it up via `git pull`).
+### Cursor
 
 ```bash
-# from inside this package (vuln-analyzer/):
-TARGET=/absolute/path/to/your/repo
-mkdir -p "$TARGET/.claude/agents" "$TARGET/.claude/skills"
-cp .claude/agents/*.md "$TARGET/.claude/agents/"
-cp -R .claude/skills/vuln-analyzer "$TARGET/.claude/skills/"
-# optional — pre-approve the tools the skill uses:
-cp .claude/settings.json "$TARGET/.claude/settings.json"  # merge if one exists
+./install.sh --cursor
 ```
 
-Open Claude Code from inside `$TARGET` to use it.
+Installs to `~/.cursor/agents/` and `~/.cursor/skills/vuln-analyzer/`
+instead. Restart Cursor.
+
+> ℹ️ Cursor's skill discovery may evolve. If your version doesn't pick
+> the skill up at `~/.cursor/skills/`, check Cursor's current docs for
+> the canonical skill / sub-agent path. The SKILL.md and agent .md
+> files are portable — only the install location changes. You can
+> re-target by editing `install.sh` or by copying the files manually.
+
+### Project-local instead of user-level
+
+When you want the skill checked-in with a specific repo (so teammates
+get it via `git pull`):
+
+```bash
+./install.sh --project /absolute/path/to/your/repo
+# or for Cursor:
+./install.sh --cursor --project /absolute/path/to/your/repo
+```
+
+This writes into `<path>/.claude/` or `<path>/.cursor/`. Then open
+Claude Code / Cursor from inside that repo.
+
+### Optional: skip permission prompts (Claude Code only)
+
+By default, the skill triggers Claude Code's permission prompt on each
+new Bash command (`jq`, `awk`, `date`, `python3`) and each new
+WebFetch host. To pre-approve them, copy or merge:
+
+```
+settings/claude-permissions.json
+```
+
+into your Claude Code settings file:
+
+- User-level: `~/.claude/settings.json`
+- Project-local: `<project>/.claude/settings.json`
+
+The reference file uses Claude Code's standard `permissions.allow`
+schema. If your settings file already exists, merge the `allow` arrays
+rather than overwriting.
+
+(Cursor uses its own permission model — see Cursor's docs.)
 
 ---
 
-## 3. Install into Cursor
-
-Cursor's skill / sub-agent paths converge with Claude Code's. As of
-recent Cursor versions:
-
-```bash
-# user-level (any Cursor workspace):
-mkdir -p ~/.cursor/agents ~/.cursor/skills
-cp .claude/agents/*.md ~/.cursor/agents/
-cp -R .claude/skills/vuln-analyzer ~/.cursor/skills/
-
-# OR project-local:
-TARGET=/absolute/path/to/your/repo
-mkdir -p "$TARGET/.cursor/agents" "$TARGET/.cursor/skills"
-cp .claude/agents/*.md "$TARGET/.cursor/agents/"
-cp -R .claude/skills/vuln-analyzer "$TARGET/.cursor/skills/"
-```
-
-> ℹ️ Cursor's skill discovery may evolve. If the paths above don't work
-> in your version, check Cursor's current docs for `Skills` and
-> `Subagents`. The SKILL.md and agent .md files themselves are
-> portable; only the install location changes.
-
-Make sure the grype MCP server is also configured in Cursor's MCP
-settings (it's the same MCP server config format as Claude Code).
-
----
-
-## 4. Verify the install (smoke test)
+## 3. Verify the install (smoke test)
 
 ### Test 1 — standalone analyzer
 
-Open Claude Code / Cursor anywhere. Ask:
+Open Claude Code or Cursor anywhere. Ask:
 
 ```
 analyze GHSA-whpj-8f3w-67p5
 ```
 
-You should see the `vulnerability-analyzer` agent kick in, validate the
-GHSA id, fetch the GitHub advisory, and return a synthesis block that
-looks like:
+You should see the `vulnerability-analyzer` agent kick in, validate
+the GHSA id, fetch the GitHub advisory, and return a synthesis block
+that looks like:
 
 ```
 ### GHSA-whpj-8f3w-67p5 — vm2 sandbox-escape vulnerability …
+**Bug class:** CWE-74
 **Impact in this codebase:** …
-**Reachable?** Source not available (no project root provided).
+**Reachable?** Source not available — no project root provided.
 **What to do:**
   1. Bump vm2 to 3.9.18.
   2. <workaround>
 **Why it matters (10s explanation):** …
-**Confidence:** High …
+**Confidence:** Medium — would be High with a project to grep.
 ```
 
 ### Test 2 — full skill flow
 
-Open Claude Code / Cursor in a real project (anything with a
+Open Claude Code or Cursor in a real project (anything with a
 `package.json`, `requirements.txt`, `go.mod`, etc.). Ask:
 
 ```
@@ -195,77 +204,90 @@ analyze hello
 Should return one sentence rejecting the input and dispatch no
 sub-agents.
 
----
-
-## 5. Updating
-
-User-level install:
-
-```bash
-cp .claude/agents/*.md ~/.claude/agents/
-cp -R .claude/skills/vuln-analyzer ~/.claude/skills/
+```
+scan alpine:latest
 ```
 
-(Or `cp -Rf` to overwrite without prompting.)
-
-Project-local install: same pattern, target your project's `.claude/`
-or `.cursor/`.
+Should be rejected with: *"This skill scans local directories only.
+For image / SBOM / PURL / CPE scans, run grype directly. …"*
 
 ---
 
-## 6. Uninstalling
+## 4. Updating
 
 ```bash
-# user-level
+cd vuln-analyzer
+git pull
+./install.sh                  # or --cursor / --project as before
+```
+
+`install.sh` overwrites the previous install cleanly — safe to re-run.
+
+---
+
+## 5. Uninstalling
+
+```bash
+# Claude Code, user-level
 rm -f ~/.claude/agents/{vulnerability,reachability,context,remediation}-analyzer.md
 rm -rf ~/.claude/skills/vuln-analyzer
 
-# Cursor user-level
+# Cursor, user-level
 rm -f ~/.cursor/agents/{vulnerability,reachability,context,remediation}-analyzer.md
 rm -rf ~/.cursor/skills/vuln-analyzer
 ```
 
+For project-local installs, replace `~/.claude` / `~/.cursor` with the
+project's `<path>/.claude` / `<path>/.cursor`.
+
 ---
 
-## 7. Troubleshooting
+## 6. Troubleshooting
 
 | Symptom | Fix |
 | --- | --- |
-| `jq: command not found` | Install jq (see Prerequisites). |
+| `jq: command not found` | Install jq (see §1), or let the skill use the bundled Python fallback (slower first-time but identical results). |
 | `mcp__grype__scan` not available | Install the grype MCP server. Confirm with "list MCP tools". |
-| Skill doesn't show up | Restart the client. Check the install path matches your client (Claude Code vs Cursor). Filenames matter (case-sensitive on Linux). |
+| Skill doesn't show up after `./install.sh` | Restart the AI assistant. On macOS / Linux filenames are case-sensitive — verify nothing was renamed during cloning. |
+| `./install.sh` errors on `--cursor` and Cursor isn't installed | The script just copies files; it doesn't check Cursor is installed. Install Cursor first, then re-run. |
 | "Scanning: …" line never appears | The skill isn't routing — the user prompt may not match the description. Try the explicit phrasing: *"run the vuln-analyzer skill on this project"*. |
 | Reachability returns `source-not-available` from a skill scan | Should not happen — the skill always passes a real `dir:` to reachability. If you see this, the standalone analyzer agent ran instead of the skill (e.g., the user asked "analyze CVE-…" rather than "scan for vulnerabilities"). |
 | "This skill scans local directories only" rejection | You passed an image ref, SBOM, PURL, or CPE. Run grype directly, or use the standalone analyzer agent for a specific advisory id (e.g., "analyze CVE-2024-…"). |
 | Report file isn't written | Total matches ≤ 5 — by spec the file is only written when matches > 5. |
 | Filename `vulnerabilites_report_…` looks misspelled | Intentional — preserved verbatim from the spec. |
+| Permission prompts on every Bash / WebFetch | Optional fix: copy `settings/claude-permissions.json` into your `settings.json` (see §2 "Optional: skip permission prompts"). |
 
 ---
 
-## 8. Package contents
+## 7. Package contents (this repo)
 
 ```
-vuln-analyzer/                                          (this package)
+vuln-analyzer/
 ├── README.md
-├── INSTALL.md                                          ← you are here
-├── .claude/
-│   ├── settings.json                                   permission allowlist (optional for project install)
-│   ├── agents/
-│   │   ├── vulnerability-analyzer.md
-│   │   ├── reachability-analyzer.md
-│   │   ├── context-analyzer.md
-│   │   └── remediation-analyzer.md
-│   └── skills/
-│       └── vuln-analyzer/
-│           ├── SKILL.md
-│           └── references/
-│               ├── jq-snippets.md
-│               ├── output-templates.md
-│               ├── grype-schema-cheatsheet.md
-│               └── cwe/
-│                   ├── index.md
-│                   └── CWE-*.md                        19 CWE playbook entries
-└── .cache/                                             created at first run; transient
+├── INSTALL.md                                  ← you are here
+├── LICENSE
+├── install.sh                                  one-command installer for Claude Code or Cursor
+├── agents/                                     four agents (lead + three sub-agents)
+│   ├── vulnerability-analyzer.md
+│   ├── reachability-analyzer.md
+│   ├── context-analyzer.md
+│   └── remediation-analyzer.md
+├── skills/
+│   └── vuln-analyzer/
+│       ├── SKILL.md                            thin orchestrator; highest authority
+│       └── references/
+│           ├── jq-snippets.md                  canonical jq commands
+│           ├── jq-fallback.py                  Python stdlib-only fallback
+│           ├── output-templates.md             markdown layouts the SKILL renders
+│           ├── grype-schema-cheatsheet.md      field map for the grype JSON
+│           └── cwe/
+│               ├── index.md
+│               └── CWE-*.md                    19 seeded playbook entries
+└── settings/
+    └── claude-permissions.json                 optional; Claude-only permission allowlist
 ```
 
-All files except `.cache/` are version-controllable.
+After install, the agents and skill live under either `~/.claude/` or
+`~/.cursor/` (or a project-local equivalent). Runtime artifacts
+(`.cache/grype_scan_*.json`, `.cache/vuln_*.json`,
+`vulnerabilites_report_*.md`) are written outside this repo.

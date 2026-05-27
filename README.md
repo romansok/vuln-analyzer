@@ -6,9 +6,14 @@ dispatches a four-agent analysis pipeline for the top 5 — reachability,
 contextualization, remediation, and a synthesizing lead agent — to
 produce one developer-readable report per vulnerability.
 
-> **Installing this for the first time?** See **[INSTALL.md](INSTALL.md)**
-> for step-by-step instructions for Claude Code and Cursor (user-level
-> and project-local).
+> **Quick install:**
+> ```
+> git clone https://github.com/romansok/vuln-analyzer.git && cd vuln-analyzer
+> ./install.sh              # Claude Code, user-level (default)
+> ./install.sh --cursor     # Cursor, user-level
+> ```
+> See **[INSTALL.md](INSTALL.md)** for all options (project-local installs,
+> permission-prompt suppression, Cursor caveats).
 
 ## Requirements
 
@@ -80,28 +85,46 @@ SKILL.md (orchestrator)
 
 ## Repository layout
 
+Tool-agnostic source — the `install.sh` script copies these into
+`~/.claude/` or `~/.cursor/` (or a project-local equivalent) depending
+on the flag you pass.
+
 ```
-.claude/
-├── settings.json                       Permission allowlist for the tools the skill routinely uses.
+.
+├── install.sh                                Installs into Claude Code or Cursor.
+├── README.md
+├── INSTALL.md
+├── LICENSE
 ├── agents/                                   The four agents (lead + three sub-agents).
 │   ├── vulnerability-analyzer.md
 │   ├── reachability-analyzer.md
 │   ├── context-analyzer.md
 │   └── remediation-analyzer.md
-└── skills/
-    └── vuln-analyzer/
-        ├── SKILL.md                          Thin orchestrator. Highest authority.
-        └── references/                       Read by the skill / agents on demand.
-            ├── jq-snippets.md                Canonical jq commands.
-            ├── output-templates.md           Exact markdown for tables and synthesis blocks.
-            ├── grype-schema-cheatsheet.md    Field map for the grype JSON.
-            └── cwe/                          One file per seeded CWE + an index.
-                ├── index.md
-                ├── CWE-20.md … CWE-1321.md
-.cache/                                       Created at first run. Transient. Safe to delete.
-├── grype_scan_<ts>.json
-└── vuln_<id>.json
+├── skills/
+│   └── vuln-analyzer/
+│       ├── SKILL.md                          Thin orchestrator. Highest authority.
+│       └── references/                       Read by the skill / agents on demand.
+│           ├── jq-snippets.md                Canonical jq commands.
+│           ├── jq-fallback.py                Python stdlib-only fallback for jq.
+│           ├── output-templates.md           Exact markdown for tables and synthesis blocks.
+│           ├── grype-schema-cheatsheet.md    Field map for the grype JSON.
+│           └── cwe/                          One file per seeded CWE + an index.
+│               ├── index.md
+│               └── CWE-20.md … CWE-1321.md
+└── settings/
+    └── claude-permissions.json               Optional. Claude-only. Pre-approves common Bash + WebFetch hosts.
 ```
+
+After install, the agents and skill live under your AI assistant's
+config directory:
+
+- Claude Code: `~/.claude/agents/*.md` and `~/.claude/skills/vuln-analyzer/`
+- Cursor:      `~/.cursor/agents/*.md` and `~/.cursor/skills/vuln-analyzer/`
+
+Runtime artifacts (`.cache/grype_scan_<ts>.json`, `.cache/vuln_<id>.json`)
+are written under the installed skill dir at scan time; the
+`vulnerabilites_report_<ts>.md` is written to the user's cwd. None of
+these belong in this repo.
 
 ## Sort order
 
@@ -178,8 +201,9 @@ follows the same flow, but reachability has real source to grep.
   POSIX tools available out of the box on macOS / Linux / WSL. Native
   Windows isn't supported; use WSL or git-bash. See [INSTALL.md](INSTALL.md#1-prerequisites)
   for installer commands.
-- **JSON stays out of context.** The full grype JSON is written to
-  `.cache/` and only read via `jq` from Bash. The model never loads it.
+- **JSON stays out of context.** The full grype JSON is written to a
+  `.cache/` dir under the installed skill and only read via `jq` from
+  Bash. The model never loads it.
 - **Directory scans only.** The skill targets local directories
   exclusively — image refs, SBOM files, PURLs, and CPEs are rejected
   at Phase 1 with a pointer to running grype directly. The standalone
@@ -196,10 +220,13 @@ follows the same flow, but reachability has real source to grep.
 
 ## Adding a new CWE to the playbook
 
+In this repo:
+
 ```
-1. Copy the template from .claude/skills/vuln-analyzer/references/cwe/index.md (bottom).
-2. Save as references/cwe/CWE-<n>.md.
-3. Add a row to references/cwe/index.md.
+1. Copy the template from skills/vuln-analyzer/references/cwe/index.md (bottom).
+2. Save as skills/vuln-analyzer/references/cwe/CWE-<n>.md.
+3. Add a row to skills/vuln-analyzer/references/cwe/index.md.
+4. Re-run ./install.sh to publish the change to your installed location.
 ```
 
 The context-analyzer reads only the files relevant to each scan, so the playbook can grow indefinitely without bloating context per run.

@@ -53,7 +53,14 @@ For each:
 
 ### Step 3 — Per-CWE hints
 
-For each CWE on the vuln, Read `<root>/.claude/skills/vuln-analyzer/references/cwe/CWE-<n>.md` and pull from its "Common workarounds when a bump is blocked" section. Re-phrase per the specific package — don't paste generic advice.
+For each CWE on the vuln, Read the playbook entry. Try these locations in order; use the first that resolves:
+
+- `~/.claude/skills/vuln-analyzer/references/cwe/CWE-<n>.md`        (Claude Code, user-level)
+- `~/.cursor/skills/vuln-analyzer/references/cwe/CWE-<n>.md`        (Cursor, user-level)
+- `$(pwd)/.claude/skills/vuln-analyzer/references/cwe/CWE-<n>.md`     (Claude, project-local)
+- `$(pwd)/.cursor/skills/vuln-analyzer/references/cwe/CWE-<n>.md`     (Cursor, project-local)
+
+Pull from its "Common workarounds when a bump is blocked" section. Re-phrase per the specific package — don't paste generic advice. If the playbook entry doesn't exist for a given CWE, skip it.
 
 ## Output schema
 

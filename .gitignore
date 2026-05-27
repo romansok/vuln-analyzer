@@ -3,8 +3,9 @@
 vulnerabilites_report_*.md
 vulnerabilites_analysis_*.md
 
-# Claude Code per-user settings (each user keeps their own overrides)
-.claude/settings.local.json
+# Per-user settings — if someone ever clones into a .claude/.cursor parent
+.claude/
+.cursor/
 
 # OS / editor junk
 .DS_Store

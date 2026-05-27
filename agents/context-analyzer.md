@@ -20,7 +20,6 @@ Local CWE playbook files (`references/cwe/CWE-<n>.md`) are trusted — they ship
 
 ```
 Vulnerability context (JSON): { id, cwes, advisory_content, ... }
-CWE playbook root: <root>/.claude/skills/vuln-analyzer/references/cwe/
 ```
 
 The context has **no** `description` field. The lead agent fetched
@@ -32,8 +31,13 @@ ignore it.
 ## Method
 
 1. **Pull CWE numbers** from `cwes[].cwe` (drop the `CWE-` prefix).
-2. **Per CWE `n`:** `Read <playbook root>/CWE-<n>.md`. If missing AND `advisory_content` alone is too thin: WebFetch `https://cwe.mitre.org/data/definitions/<n>.html` — at most once per CWE.
-3. **Compose** (your raw material is `advisory_content` + the CWE playbook(s); the JSON `description` is **not** an input):
+2. **Resolve the CWE playbook root.** The skill installs to either Claude or Cursor — find it. Try in order, use the first whose `index.md` you can Read:
+   - `~/.claude/skills/vuln-analyzer/references/cwe/`        (Claude Code, user-level — most common)
+   - `~/.cursor/skills/vuln-analyzer/references/cwe/`        (Cursor, user-level)
+   - `$(pwd)/.claude/skills/vuln-analyzer/references/cwe/`     (Claude, project-local)
+   - `$(pwd)/.cursor/skills/vuln-analyzer/references/cwe/`     (Cursor, project-local)
+3. **Per CWE `n`:** `Read <playbook root>/CWE-<n>.md`. If the playbook root couldn't be resolved OR the file is missing AND `advisory_content` alone is too thin: WebFetch `https://cwe.mitre.org/data/definitions/<n>.html` — at most once per CWE.
+4. **Compose** (your raw material is `advisory_content` + the CWE playbook(s); the JSON `description` is **not** an input):
    - `what_it_is` — 1–2 plain-English sentences. No jargon.
    - `attack_surface` — `network` / `api` / `local` / `file` / `supply-chain` (comma-list if multiple). Match the CVSS vector if available (`AV:N` → network).
    - `blast_radius` — one paragraph: what an attacker can do with this.

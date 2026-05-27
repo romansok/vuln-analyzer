@@ -16,11 +16,14 @@ it, follow this file.
 
 ## Conventions used below
 
-- `<root>` = absolute path of `vuln-analyzer/`. Discover it from the
-  location of this SKILL.md (parent of `.claude/`).
+- `<skill_root>` = absolute path of the directory that contains this
+  SKILL.md. After a typical install that's:
+  - Claude Code user-level: `~/.claude/skills/vuln-analyzer/`
+  - Cursor user-level:      `~/.cursor/skills/vuln-analyzer/`
+  - Project-local equivalents of either.
 - `<ts>` = `$(date +%y%m%d_%H%M%S)`.
-- `$SCAN_JSON` = `<root>/.cache/grype_scan_<ts>.json`.
-- `$OUT_DIR` = `<root>/.cache`.
+- `$SCAN_JSON` = `<skill_root>/.cache/grype_scan_<ts>.json`.
+- `$OUT_DIR` = `<skill_root>/.cache`.
 - `$REPORT` = `$(pwd)/vulnerabilites_report_<ts>.md` (cwd = user's
   invocation directory; spelling matches the user's spec).
 
@@ -195,7 +198,7 @@ in order:
      subagent_type="vulnerability-analyzer",
      prompt=<<<
        Vulnerability id: <VULN_ID>
-       Per-vuln context file: <root>/.cache/vuln_<VULN_ID>.json
+       Per-vuln context file: <skill_root>/.cache/vuln_<VULN_ID>.json
        Scan target (resolved): <resolved-target-from-Phase-1>
        Project root for reachability search: <abs path of the dir: scan target>     // always a real path; skill never passes "none"
        Return your final synthesis block (see references/output-templates.md
