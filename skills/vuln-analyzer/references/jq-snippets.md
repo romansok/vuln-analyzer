@@ -183,7 +183,7 @@ jq -r '...snippet 4 or 5...' "$SCAN_JSON" | awk '...one-liner above...'
 
 ## 7) Per-vuln trimmed JSON (writes `.cache/vuln_<id>.json`)
 
-> **Note on the `description` field below.** The grype JSON's `description` is typically a one-line label (e.g. `"vm2 Sandbox Escape vulnerability"`) — fine for the SKILL's human-readable table, **never used by the agents for analysis**. The lead `vulnerability-analyzer` agent fetches the real advisory text from `data_source`/`advisory_urls[]` into an in-memory `advisory_content` field and strips `description` before fanning out to sub-agents. We still emit `description` here because (a) it's harmless and (b) it's useful for human inspection of the cache file. See `.claude/agents/vulnerability-analyzer.md` §"Two kinds of 'description'".
+> **Note on the `description` field below.** The grype JSON's `description` is typically a one-line label (e.g. `"vm2 Sandbox Escape vulnerability"`) — fine for the SKILL's human-readable table, **never used by the agents for analysis**. The lead `vulnerability-analyzer` agent fetches the real advisory text from `data_source`/`advisory_urls[]` into an in-memory `advisory_content` field and strips `description` before fanning out to sub-agents. We still emit `description` here because (a) it's harmless and (b) it's useful for human inspection of the cache file. See `agents/vulnerability-analyzer.md` §"Two kinds of 'description'".
 
 ```bash
 jq --arg id "$VULN_ID" '
