@@ -26,7 +26,12 @@ it, follow this file.
 
 All jq commands referenced here are written verbatim in
 [references/jq-snippets.md](references/jq-snippets.md) — copy them; do
-not reinvent. All output layouts are in
+not reinvent. If `jq` is not on the host (`command -v jq` returns
+non-zero), use the Python fallback at
+[references/jq-fallback.py](references/jq-fallback.py) — same
+operations, byte-identical output, Python 3 stdlib only. The mapping
+from jq snippet to fallback subcommand is documented at the bottom of
+`jq-snippets.md`. All output layouts are in
 [references/output-templates.md](references/output-templates.md). The
 field map is in [references/grype-schema-cheatsheet.md](references/grype-schema-cheatsheet.md).
 

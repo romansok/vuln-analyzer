@@ -26,13 +26,15 @@ but require a shim on bare Windows.
 ### Required binaries
 
 ```bash
-jq --version           # any 1.6+; 1.7 preferred
-awk --version          # POSIX awk; pre-installed on macOS/Linux/WSL
 bash --version         # 3.2+; pre-installed on macOS/Linux/WSL
-date --version         # any (GNU or BSD)
+date --version         # any (GNU or BSD); pre-installed
+python3 --version      # 3.8+; pre-installed on macOS/Linux/most WSL distros
 ```
 
-If `jq` isn't installed:
+`jq` is **strongly recommended** but not strictly required — the SKILL
+ships with a Python 3 stdlib-only fallback at
+`.claude/skills/vuln-analyzer/references/jq-fallback.py` that implements
+the same operations with byte-identical output. Install jq if you can:
 
 | OS | Install command |
 | --- | --- |
@@ -41,6 +43,11 @@ If `jq` isn't installed:
 | Fedora/RHEL | `sudo dnf install jq` |
 | Arch | `sudo pacman -S jq` |
 | Windows WSL | use the Linux command for your WSL distro |
+
+`awk` is needed only when the SKILL takes the jq path (the awk
+one-liner converts TSV to Markdown). It's pre-installed on every
+POSIX system. The Python fallback bundles this step internally — no
+awk needed when jq is absent.
 
 ### grype MCP server
 

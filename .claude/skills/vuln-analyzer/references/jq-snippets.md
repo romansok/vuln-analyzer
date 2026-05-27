@@ -244,7 +244,27 @@ If `0` → SKILL prints "No vulnerabilities found." and STOPS.
 
 ## Python fallback (when jq is absent)
 
-Wrapper script `references/jq-fallback.py` is **not** included by default
-because jq is present on every recent macOS. If a future environment
-lacks jq, replace the above with `python3 -c '...'` using `json.load`
-and the standard library — no extra deps.
+If `jq` is not installed, use [`jq-fallback.py`](jq-fallback.py) — a
+Python 3 stdlib-only script in this same directory that implements
+the same operations. The SKILL should detect jq's absence and switch
+to the fallback automatically (see SKILL.md Phase 0 / Phase 3).
+
+Subcommand mapping (jq snippet → fallback):
+
+| jq snippet | fallback invocation |
+| --- | --- |
+| §1 severity counts | `python3 jq-fallback.py severity     "$SCAN_JSON"` |
+| §2 total counts | `python3 jq-fallback.py totals       "$SCAN_JSON"` |
+| §3 top-5 distinct IDs | `python3 jq-fallback.py top5-ids     "$SCAN_JSON"` |
+| §4+§6 top-5 markdown table | `python3 jq-fallback.py top5-table   "$SCAN_JSON"` |
+| §5+§6 full per-match table | `python3 jq-fallback.py full-table   "$SCAN_JSON"` |
+| §7 per-vuln trimmed JSON | `python3 jq-fallback.py vuln         "$SCAN_JSON" "$VULN_ID"` |
+| §8 canonical CVE from GHSA | `python3 jq-fallback.py related-cve  "$SCAN_JSON" "$VULN_ID"` |
+| §9 empty-scan check | `python3 jq-fallback.py empty-check  "$SCAN_JSON"` |
+
+The fallback **rolls the awk markdown-conversion step into the
+table-emitting subcommands** — `top5-table` and `full-table` emit
+ready-to-render Markdown directly, no `awk` pipe required.
+
+Output is byte-identical to the corresponding jq+awk pipeline for the
+operations the SKILL relies on (verified against a 181-match fixture).

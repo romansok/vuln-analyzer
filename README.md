@@ -14,9 +14,10 @@ produce one developer-readable report per vulnerability.
 
 - **OS:** macOS, Linux, or Windows + WSL. Native Windows cmd / PowerShell
   is **not** supported — the skill uses POSIX shell tools.
-- **Tools:** `jq` (1.6+), `awk` (POSIX), `bash` (3.2+), `date`. All
-  pre-installed on macOS / Linux / WSL except `jq` (one `brew install`
-  / `apt install` away).
+- **Tools:** `bash` (3.2+), `date`, `python3` (3.8+) — all pre-installed on macOS / Linux / WSL.
+  `jq` (1.6+) is strongly recommended; if it's missing, a bundled
+  Python stdlib-only fallback (`jq-fallback.py`) handles the same
+  operations with byte-identical output.
 - **Client:** Claude Code or Cursor with the [grype MCP server](https://github.com/romansok/grype-mcp/)
   configured.
 
