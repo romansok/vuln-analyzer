@@ -212,10 +212,33 @@ For each of the 5:
 
 ### Step 2 — Dispatch all surviving vulns in one message (parallel)
 
-Issue all `Task(vulnerability-analyzer)` calls **in a single message
-turn**, one per surviving id. The harness runs them concurrently.
+In a **single assistant turn**, issue every
+`Task(vulnerability-analyzer)` call simultaneously — a multi-tool-use
+message that bundles N Task invocations together (where N is the
+number of surviving ids, typically 5). The harness runs them
+concurrently.
 
-Each Task prompt:
+**You may emit at most ONE short status line** before dispatching, e.g.
+`Analyzing top 5 in parallel…`. Then dispatch. **Then say nothing
+else until all Tasks return.**
+
+#### Forbidden between-call narration
+
+Do **not** emit any of these (or close variants):
+
+- `Now I'll dispatch detailed analysis for each vulnerability (one at a time). Starting with the first:`
+- `Now dispatching the deep analyzer on each of the top 5, one at a time.`
+- `Analyzing vuln #1…`, `Moving to the next one…`, `Now on vuln #2 of 5…`
+- Any phrasing that implies serial / one-at-a-time / sequential dispatch.
+- Any per-vuln "starting…" / "done with…" status line.
+
+The model often narrates between tool calls out of habit. Resist it
+here. The user expects: top-5 table → one short status line → all 5
+synthesis blocks (in sort order) emitted after the parallel batch
+returns. Anything in between is noise that misrepresents the
+execution shape.
+
+#### The Task prompt (issued N times in the same message)
 
 ```
 Task(
