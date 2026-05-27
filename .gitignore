@@ -1,0 +1,16 @@
+# Runtime artifacts written by the SKILL — not part of the package
+.cache/
+vulnerabilites_report_*.md
+vulnerabilites_analysis_*.md
+
+# Claude Code per-user settings (each user keeps their own overrides)
+.claude/settings.local.json
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jq:*)",
+      "Bash(awk:*)",
+      "Bash(date:*)",
+      "Bash(mkdir:*)",
+      "Bash(python3:*)",
+      "Bash(cat:*)",
+      "Bash(wc:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:nvd.nist.gov)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:ghsa.io)",
+      "WebFetch(domain:osv.dev)",
+      "WebFetch(domain:security.snyk.io)",
+      "WebFetch(domain:cve.org)",
+      "WebFetch(domain:www.cve.org)",
+      "WebFetch(domain:cve.mitre.org)",
+      "WebFetch(domain:cwe.mitre.org)",
+      "WebFetch(domain:rustsec.org)",
+      "WebFetch(domain:pkg.go.dev)",
+      "WebFetch(domain:security-tracker.debian.org)",
+      "WebFetch(domain:access.redhat.com)",
+      "WebFetch(domain:ubuntu.com)",
+      "WebFetch(domain:errata.almalinux.org)",
+      "WebFetch(domain:linux.oracle.com)",
+      "WebFetch(domain:alas.aws.amazon.com)"
+    ]
+  }
+}
