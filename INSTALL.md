@@ -12,7 +12,13 @@ The whole install is one command:
 ./install.sh --cursor         # Cursor, user-level
 ./install.sh --project /path  # Claude Code, project-local at /path/.claude
 ./install.sh --cursor --project /path   # Cursor, project-local at /path/.cursor
+./install.sh --force          # Overwrite foreign files of the same name at the destination
 ```
+
+**Conflict policy in one line:** `install.sh` refuses to overwrite any
+agent or skill in the destination that wasn't put there by a previous
+vuln-analyzer install. Other agents and skills (different names) are
+**never** touched. See §2 for details.
 
 ---
 
@@ -128,6 +134,27 @@ get it via `git pull`):
 This writes into `<path>/.claude/` or `<path>/.cursor/`. Then open
 Claude Code / Cursor from inside that repo.
 
+### What if the destination already has agents and skills?
+
+The script is deliberately careful:
+
+- **Agents and skills with names different from ours** (e.g. your own
+  `code-reviewer.md`, your own skill called `my-things`) are **never**
+  touched — neither by default nor with `--force`.
+- **Agents named `vulnerability-analyzer.md`, `reachability-analyzer.md`,
+  `context-analyzer.md`, `remediation-analyzer.md`, or a skill called
+  `vuln-analyzer`** — the script first checks whether they came from a
+  previous run of this same installer (it leaves a sentinel file
+  `.vuln-analyzer.installed` in the destination, and also checks the
+  SKILL.md's `name:` line). If so, the script treats the run as an
+  **upgrade** and overwrites cleanly without asking. If the files were
+  put there by something else (your own work, a different package),
+  the script **aborts without changes** and lists the conflicts.
+- Pass **`--force`** if you actually want to overwrite foreign files
+  of the same name. Useful when you've forked or hand-modified our
+  agents and now want to revert. Even with `--force`, only the
+  named-collision files are replaced — everything else stays intact.
+
 ### Optional: skip permission prompts (Claude Code only)
 
 By default, the skill triggers Claude Code's permission prompt on each
@@ -221,7 +248,10 @@ git pull
 ./install.sh                  # or --cursor / --project as before
 ```
 
-`install.sh` overwrites the previous install cleanly — safe to re-run.
+`install.sh` detects the previous vuln-analyzer install (via the
+`.vuln-analyzer.installed` sentinel file or the `name:` line in the
+existing `SKILL.md`), reports `↻ upgrading existing vuln-analyzer
+install`, and overwrites cleanly. **No `--force` needed for upgrades.**
 
 ---
 
@@ -231,10 +261,12 @@ git pull
 # Claude Code, user-level
 rm -f ~/.claude/agents/{vulnerability,reachability,context,remediation}-analyzer.md
 rm -rf ~/.claude/skills/vuln-analyzer
+rm -f ~/.claude/.vuln-analyzer.installed
 
 # Cursor, user-level
 rm -f ~/.cursor/agents/{vulnerability,reachability,context,remediation}-analyzer.md
 rm -rf ~/.cursor/skills/vuln-analyzer
+rm -f ~/.cursor/.vuln-analyzer.installed
 ```
 
 For project-local installs, replace `~/.claude` / `~/.cursor` with the
@@ -256,6 +288,7 @@ project's `<path>/.claude` / `<path>/.cursor`.
 | Report file isn't written | Total matches ≤ 5 — by spec the file is only written when matches > 5. |
 | Filename `vulnerabilites_report_…` looks misspelled | Intentional — preserved verbatim from the spec. |
 | Permission prompts on every Bash / WebFetch | Optional fix: copy `settings/claude-permissions.json` into your `settings.json` (see §2 "Optional: skip permission prompts"). |
+| `install.sh` aborted with "targets already exist … NOT put there by a previous vuln-analyzer install" | You already have files with names matching ours (`{vulnerability,reachability,context,remediation}-analyzer.md` or a skill called `vuln-analyzer`) that the script didn't recognize as its own. Move/rename them, OR re-run with `--force` to overwrite them. Other files in the destination are untouched either way. |
 
 ---
 
