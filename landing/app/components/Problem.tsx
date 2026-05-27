@@ -52,19 +52,24 @@ const toneStyle: Record<
   "critical" | "warn" | "success",
   { ring: string; iconBg: string; iconFg: string }
 > = {
+  // RGB triplets here mirror the CSS token values so the ring/icon-bg
+  // tints sit on the same hue as the icon foreground.
   critical: {
-    ring: "ring-[color:rgb(244_63_94_/_0.35)]",
-    iconBg: "bg-[color:rgb(244_63_94_/_0.1)]",
+    // --color-critical: #ef4444 (red-500)
+    ring: "ring-[color:rgb(239_68_68_/_0.35)]",
+    iconBg: "bg-[color:rgb(239_68_68_/_0.1)]",
     iconFg: "text-[var(--color-critical)]",
   },
   warn: {
+    // --color-warn: #f59e0b (amber-500)
     ring: "ring-[color:rgb(245_158_11_/_0.3)]",
     iconBg: "bg-[color:rgb(245_158_11_/_0.1)]",
     iconFg: "text-[var(--color-warn)]",
   },
   success: {
-    ring: "ring-[color:rgb(139_92_246_/_0.35)]",
-    iconBg: "bg-[color:rgb(139_92_246_/_0.1)]",
+    // --color-accent-1: #3b82f6 (blue-500)
+    ring: "ring-[color:rgb(59_130_246_/_0.35)]",
+    iconBg: "bg-[color:rgb(59_130_246_/_0.1)]",
     iconFg: "text-[var(--color-accent-1)]",
   },
 };
