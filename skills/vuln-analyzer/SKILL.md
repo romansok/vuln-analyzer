@@ -39,8 +39,22 @@ from jq snippet to fallback subcommand is documented at the bottom of
 field map is in [references/grype-schema-cheatsheet.md](references/grype-schema-cheatsheet.md).
 
 Each phase below ends with one or more **CHECKPOINTS**. A checkpoint
-is a verification gate: if it fails, do the documented thing
-(typically STOP cleanly or ASK the user) — do not paper over it.
+is an **internal verification gate**, not user-facing output.
+
+- **On pass** — proceed to the next step. Say nothing about the
+  checkpoint. The user should never see strings like `CHECKPOINT 1
+  passed ✅` or `↳ checkpoint 2 OK` or any similar status line. The
+  checkpoint numbers exist only in this file as documentation for
+  you; they are not labels to echo.
+- **On fail** — emit exactly the documented failure message for that
+  checkpoint, then take the documented action (STOP / ASK / continue
+  with a logged warning). Failure output is the only time a
+  checkpoint surfaces to the user.
+
+The only user-visible output of a phase is the explicit render it
+documents (e.g., Phase 1's `Scanning: <target>` line, Phase 3's
+severity counts and top-5 table, Phase 4's per-vuln synthesis
+blocks, Phase 5's closeout). Everything else is silent verification.
 
 ---
 
