@@ -1,0 +1,261 @@
+@import "tailwindcss";
+
+/* -------------------------------------------------------------
+   Design tokens — modern dark with vibrant accents.
+   Exposed both as CSS variables and Tailwind theme tokens so
+   utility classes (bg-bg, text-muted, etc.) work out of the box.
+   ------------------------------------------------------------- */
+@theme {
+  --color-bg: #09090b;
+  --color-surface: #121214;
+  --color-surface-2: #18181b;
+  --color-border: #27272a;
+  --color-border-strong: #3f3f46;
+  --color-text: #fafafa;
+  --color-muted: #a1a1aa;
+  --color-muted-2: #71717a;
+  --color-accent-1: #8b5cf6;
+  --color-accent-2: #ec4899;
+  --color-accent-3: #22d3ee;
+  --color-critical: #f43f5e;
+  --color-warn: #f59e0b;
+  --color-success: #10b981;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* -------------------------------------------------------------
+   Base layer
+   ------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent-1) 40%, transparent);
+  color: var(--color-text);
+}
+
+/* Reduce motion globally for users who request it. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* -------------------------------------------------------------
+   Reusable utility classes
+   ------------------------------------------------------------- */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-1) 0%,
+    var(--color-accent-2) 60%,
+    var(--color-accent-3) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-border {
+  position: relative;
+  background: var(--color-surface);
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-accent-1) 50%, transparent),
+    color-mix(in oklab, var(--color-accent-2) 30%, transparent) 50%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.surface-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+}
+
+.surface-card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.section-pad {
+  padding-top: clamp(4rem, 8vw, 7rem);
+  padding-bottom: clamp(4rem, 8vw, 7rem);
+}
+
+/* Eyebrow / pill */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-accent-1) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-accent-1) 30%, transparent);
+  color: color-mix(in oklab, var(--color-accent-1) 70%, var(--color-text));
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Hero ambient gradient orb */
+.hero-orb {
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 70vh;
+  background:
+    radial-gradient(
+      40% 50% at 25% 30%,
+      color-mix(in oklab, var(--color-accent-1) 35%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      35% 45% at 75% 40%,
+      color-mix(in oklab, var(--color-accent-2) 28%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      30% 40% at 50% 70%,
+      color-mix(in oklab, var(--color-accent-3) 22%, transparent) 0%,
+      transparent 70%
+    );
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+  animation: orb-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes orb-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(2%, 1.5%, 0) scale(1.05); }
+}
+
+/* Faint grid for the hero background */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--color-border) 50%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--color-border) 50%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+}
+
+/* Terminal */
+.terminal {
+  background: #0b0b0e;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: #d4d4d8;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--color-accent-1) 12%, transparent),
+    0 20px 60px -20px rgba(139, 92, 246, 0.35),
+    0 30px 80px -30px rgba(236, 72, 153, 0.2);
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  background: #131316;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.terminal-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 9999px;
+}
+
+.terminal-body {
+  padding: 1.1rem 1.25rem 1.4rem;
+  min-height: 22rem;
+  white-space: pre-wrap;
+  word-break: normal;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 0.55ch;
+  height: 1.05em;
+  background: var(--color-accent-3);
+  vertical-align: -2px;
+  margin-left: 1px;
+  animation: cursor-blink 1.05s steps(1) infinite;
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}
+
+/* Code block aesthetics */
+.code-block {
+  background: #0b0b0e;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.825rem;
+  line-height: 1.6;
+  color: #d4d4d8;
+  overflow: hidden;
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.85rem;
+  background: #131316;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.7rem;
+  color: var(--color-muted-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.code-block pre {
+  padding: 0.95rem 1.15rem;
+  margin: 0;
+  overflow-x: auto;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-accent-1);
+  outline-offset: 2px;
+  border-radius: 0.35rem;
+}
