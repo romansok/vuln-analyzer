@@ -61,6 +61,11 @@ ignore it.
 ## Hard rules
 
 - Wrap output in `<<<JSON>>>` / `<<</JSON>>>` markers exactly.
+- **Prefer the local playbook + `advisory_content`.** 19 CWEs ship
+  with the skill; most calls should not WebFetch MITRE at all. The
+  MITRE fallback is a *last* resort — trigger only when the local
+  playbook for that specific CWE is missing AND `advisory_content`
+  doesn't give you enough to write a plain-English explanation.
 - **Plain language.** *"Deserialization gadget chain"* → *"an attacker hides a trap inside a saved object that fires when the server loads it."*
 - **One concrete example, always.** A vuln without an example is forgettable.
 - **Don't paste raw MITRE prose** — summarize.

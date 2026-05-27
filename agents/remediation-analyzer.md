@@ -84,6 +84,10 @@ Order `workarounds[]` low-effort → high-effort. Cap at 4.
 ## Hard rules
 
 - Wrap output in `<<<JSON>>>` / `<<</JSON>>>` markers exactly.
+- **No WebFetch.** The advisory text you need is already in
+  `advisory_content`; the per-CWE playbook is on disk. There is no
+  reason to open a network connection from this agent. (`WebFetch`
+  remains in the tools list only as a future-extension lever.)
 - **Always ≥ 1 workaround**, even when bump is trivial.
 - **Concrete code, not vibes.** "Validate inputs" is useless — show the signature.
 - **Don't recommend rewrites** ("switch libraries") — out of scope.
