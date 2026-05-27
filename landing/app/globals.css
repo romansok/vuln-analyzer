@@ -14,10 +14,13 @@
   --color-text: #fafafa;
   --color-muted: #a1a1aa;
   --color-muted-2: #71717a;
-  --color-accent-1: #8b5cf6;
-  --color-accent-2: #ec4899;
-  --color-accent-3: #22d3ee;
-  --color-critical: #f43f5e;
+
+  /* Solid accents: deep blue + steel. No multi-stop gradients anywhere. */
+  --color-accent-1: #3b82f6;  /* blue-500, primary */
+  --color-accent-2: #94a3b8;  /* slate-400, steel / secondary */
+  --color-accent-3: #60a5fa;  /* blue-400, soft highlights */
+
+  --color-critical: #ef4444;
   --color-warn: #f59e0b;
   --color-success: #10b981;
 
@@ -61,39 +64,26 @@ body {
 /* -------------------------------------------------------------
    Reusable utility classes
    ------------------------------------------------------------- */
+/* Kept the class name for backwards compatibility but it's now a solid
+   accent color, no gradient. Used on highlighted words in section headlines. */
 .gradient-text {
-  background: linear-gradient(
-    135deg,
-    var(--color-accent-1) 0%,
-    var(--color-accent-2) 60%,
-    var(--color-accent-3) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-accent-1);
 }
 
-.gradient-border {
+/* Subtle accent rule on the top edge of feature cards. Solid color,
+   no multi-hue gradient. */
+.accent-rule {
   position: relative;
-  background: var(--color-surface);
 }
-.gradient-border::before {
+.accent-rule::before {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    color-mix(in oklab, var(--color-accent-1) 50%, transparent),
-    color-mix(in oklab, var(--color-accent-2) 30%, transparent) 50%,
-    transparent 100%
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  top: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 1px;
+  background: color-mix(in oklab, var(--color-accent-1) 45%, transparent);
+  border-radius: 1px;
   pointer-events: none;
 }
 
@@ -128,31 +118,21 @@ body {
   text-transform: uppercase;
 }
 
-/* Hero ambient gradient orb */
+/* Ambient blue glow behind the hero. Single-hue radial fade — not a
+   gradient effect, just soft ambient light. */
 .hero-orb {
   position: absolute;
   inset: -20% -10% auto -10%;
   height: 70vh;
-  background:
-    radial-gradient(
-      40% 50% at 25% 30%,
-      color-mix(in oklab, var(--color-accent-1) 35%, transparent) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      35% 45% at 75% 40%,
-      color-mix(in oklab, var(--color-accent-2) 28%, transparent) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      30% 40% at 50% 70%,
-      color-mix(in oklab, var(--color-accent-3) 22%, transparent) 0%,
-      transparent 70%
-    );
-  filter: blur(60px);
+  background: radial-gradient(
+    45% 55% at 50% 30%,
+    color-mix(in oklab, var(--color-accent-1) 28%, transparent) 0%,
+    transparent 70%
+  );
+  filter: blur(80px);
   pointer-events: none;
   z-index: 0;
-  animation: orb-drift 18s ease-in-out infinite alternate;
+  animation: orb-drift 22s ease-in-out infinite alternate;
 }
 
 @keyframes orb-drift {
@@ -182,8 +162,8 @@ body {
   overflow: hidden;
   box-shadow:
     0 0 0 1px color-mix(in oklab, var(--color-accent-1) 12%, transparent),
-    0 20px 60px -20px rgba(139, 92, 246, 0.35),
-    0 30px 80px -30px rgba(236, 72, 153, 0.2);
+    0 20px 60px -20px rgba(59, 130, 246, 0.28),
+    0 30px 80px -30px rgba(59, 130, 246, 0.15);
 }
 
 .terminal-header {

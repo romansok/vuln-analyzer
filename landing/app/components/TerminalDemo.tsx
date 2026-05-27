@@ -18,13 +18,13 @@ import {
  * ------------------------------------------------------------------------- */
 
 const C = {
-  prompt: "text-[var(--color-accent-3)]",   // $ and ▸
+  prompt: "text-[var(--color-accent-3)]",   // $ and ▸ — soft blue
   ok: "text-[var(--color-success)]",
   critical: "text-[var(--color-critical)]",
   high: "text-[var(--color-warn)]",
   med: "text-[var(--color-muted)]",
-  accent: "text-[var(--color-accent-2)]",
-  cyan: "text-[var(--color-accent-3)]",
+  accent: "text-[var(--color-accent-1)]",   // file paths, risk scores — primary blue
+  cyan: "text-[var(--color-accent-3)]",     // light blue (alias kept for clarity)
   muted: "text-[var(--color-muted-2)]",
   text: "text-[var(--color-text)]",
 };

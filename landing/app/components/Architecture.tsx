@@ -7,7 +7,7 @@ type Agent = {
   name: string;
   role: string;
   returns: string;
-  color: "violet" | "pink" | "cyan";
+  color: "blue" | "steel" | "skyblue";
 };
 
 const agents: Agent[] = [
@@ -15,26 +15,26 @@ const agents: Agent[] = [
     name: "reachability-analyzer",
     role: "Walks the source tree for vulnerable imports and call sites.",
     returns: "verdict + file:line evidence",
-    color: "violet",
+    color: "blue",
   },
   {
     name: "context-analyzer",
     role: "Explains the CWE class in plain English from a local playbook.",
     returns: "what-it-is, attack-surface, blast-radius",
-    color: "pink",
+    color: "steel",
   },
   {
     name: "remediation-analyzer",
     role: "Proposes the primary fix plus ranked workarounds with effort.",
     returns: "primary_fix + workaround list",
-    color: "cyan",
+    color: "skyblue",
   },
 ];
 
 const accentMap: Record<Agent["color"], string> = {
-  violet: "var(--color-accent-1)",
-  pink: "var(--color-accent-2)",
-  cyan: "var(--color-accent-3)",
+  blue: "var(--color-accent-1)",
+  steel: "var(--color-accent-2)",
+  skyblue: "var(--color-accent-3)",
 };
 
 export function Architecture() {
@@ -134,6 +134,9 @@ function Diagram() {
     { name: "remediation-analyzer", desc: "fix paths", cx: W - 140 - subW / 2, accent: "var(--color-accent-3)" },
   ];
 
+  // Single solid blue, used for connector lines and the lead box border.
+  const LINE = "#3b82f6";
+
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -142,15 +145,6 @@ function Diagram() {
       className="block h-auto w-full"
     >
       <defs>
-        <linearGradient id="lead-grad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="60%" stopColor="#ec4899" />
-          <stop offset="100%" stopColor="#22d3ee" />
-        </linearGradient>
-        <linearGradient id="line-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.45" />
-        </linearGradient>
         <marker
           id="arrow"
           viewBox="0 0 10 10"
@@ -160,7 +154,7 @@ function Diagram() {
           markerHeight="6"
           orient="auto-start-reverse"
         >
-          <path d="M 0 0 L 10 5 L 0 10 Z" fill="url(#line-grad)" />
+          <path d="M 0 0 L 10 5 L 0 10 Z" fill={LINE} fillOpacity="0.7" />
         </marker>
       </defs>
 
@@ -168,7 +162,8 @@ function Diagram() {
       {/* orch -> lead */}
       <path
         d={`M ${orch.cx} ${orch.cy + orch.h / 2} L ${lead.cx} ${lead.cy - lead.h / 2}`}
-        stroke="url(#line-grad)"
+        stroke={LINE}
+        strokeOpacity="0.55"
         strokeWidth="1.5"
         fill="none"
         markerEnd="url(#arrow)"
@@ -178,7 +173,8 @@ function Diagram() {
         <path
           key={s.name}
           d={`M ${lead.cx} ${lead.cy + lead.h / 2} C ${lead.cx} ${lead.cy + lead.h / 2 + 70}, ${s.cx} ${subY - subH / 2 - 70}, ${s.cx} ${subY - subH / 2}`}
-          stroke="url(#line-grad)"
+          stroke={LINE}
+        strokeOpacity="0.55"
           strokeWidth="1.5"
           fill="none"
           markerEnd="url(#arrow)"
@@ -196,7 +192,7 @@ function Diagram() {
         muted
       />
 
-      {/* Lead box (gradient stroke) */}
+      {/* Lead box — solid blue border highlights its role. */}
       <g>
         <rect
           x={lead.cx - lead.w / 2}
@@ -205,7 +201,7 @@ function Diagram() {
           height={lead.h}
           rx={12}
           fill="#121214"
-          stroke="url(#lead-grad)"
+          stroke={LINE}
           strokeWidth="1.5"
         />
         <text
@@ -329,7 +325,7 @@ function Box({
         height={h}
         rx={12}
         fill="#121214"
-        stroke={muted ? "#27272a" : "url(#lead-grad)"}
+        stroke={muted ? "#27272a" : "#3b82f6"}
         strokeWidth={muted ? 1 : 1.5}
       />
       <text

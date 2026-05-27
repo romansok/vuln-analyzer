@@ -46,11 +46,7 @@ export function Hero() {
           <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <a
               href="#install"
-              className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-lg px-6 py-3 text-sm font-medium text-white transition-transform hover:scale-[1.015]"
-              style={{
-                background:
-                  "linear-gradient(135deg, var(--color-accent-1) 0%, var(--color-accent-2) 75%)",
-              }}
+              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-accent-1)] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--color-accent-3)]"
             >
               Quick install
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

@@ -84,10 +84,10 @@ export function Solution() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.5, delay: i * 0.06, ease: "easeOut" }}
-                className="surface-card gradient-border group relative overflow-hidden p-6 sm:p-7"
+                className="surface-card group relative overflow-hidden p-6 sm:p-7 transition-colors hover:border-[color:rgb(59_130_246_/_0.4)]"
               >
                 <div className="flex items-start gap-4">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-accent-1)] transition-colors group-hover:text-[var(--color-accent-2)]">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-accent-1)] transition-colors group-hover:text-[var(--color-accent-3)]">
                     <Icon className="h-5 w-5" />
                   </span>
                   <div>
