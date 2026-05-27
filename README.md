@@ -67,10 +67,10 @@ SKILL.md (orchestrator)
   ├─ Scans with mcp__grype__scan (output_format=json)
   ├─ Caches JSON; reads it only via jq snippets
   ├─ Ranks, renders, writes the report file
-  └─ Dispatches Task(vulnerability-analyzer) for each top-5 vuln
+  └─ Dispatches 5 × Task(vulnerability-analyzer) IN PARALLEL — one per top-5 vuln
          │
          ▼
-     vulnerability-analyzer (lead)
+     vulnerability-analyzer (lead)   ×5 concurrent instances
        1. Validates the input (CVE / GHSA / advisory URL).
        2. Resolves vuln context (cache file, fetched URL, or self-gathered).
        3. Extracts the vulnerable symbols (functions, classes, sinks,
@@ -81,6 +81,11 @@ SKILL.md (orchestrator)
             • context-analyzer       — explains the bug class in plain English (uses local CWE playbook).
             • remediation-analyzer   — primary fix + ranked workarounds, informed by the symbols.
        5. Synthesizes one developer-readable block and returns it.
+
+  The SKILL collects all 5 returned blocks, then emits them inline in the
+  risk-sorted order of the top-5 table (not arrival order). Two-tier
+  parallelism (5 leads × 3 sub-agents each) brings wall time down to
+  roughly the slowest single chain, not the sum.
 ```
 
 ## Repository layout

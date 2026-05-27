@@ -188,55 +188,77 @@ Render inline, using the layouts from `references/output-templates.md`:
 - the top-5 markdown table,
 - if `$REPORT` was written, a one-line pointer: `Full report: <abs path>`.
 
-## Phase 4 — Deep analysis fan-out (top 5)
+## Phase 4 — Deep analysis fan-out (top 5, in parallel)
 
-Extract the top-5 distinct vuln IDs (snippet §3). For each `$VULN_ID`,
-in order:
+The five top vulns are independent — each gets its own context file
+and its own advisory fetch, and there's no shared state. Run them
+**concurrently**, not serially.
 
-1. Write its trimmed context file → snippet §7 →
-   `$OUT_DIR/vuln_<VULN_ID>.json`.
+### Step 1 — Write all five context files first
 
-   **CHECKPOINT 8 — context file written AND is a real object.**
-   - `[ -s "$OUT_DIR/vuln_${VULN_ID}.json" ]` (file is non-empty), AND
-   - `jq -e 'type == "object"' "$OUT_DIR/vuln_${VULN_ID}.json" >/dev/null`
-     (content is a JSON object, not the literal `null` that snippet §7
-     emits when the id-filter matched nothing).
-   - ❌ Either fails → print `Skipping <VULN_ID>: context-file
-     <missing | empty | not-an-object>.` and CONTINUE with the next
-     id (do not abort the whole phase).
+Extract the top-5 distinct vuln IDs (snippet §3). For each
+`$VULN_ID`, write its trimmed context to
+`$OUT_DIR/vuln_<VULN_ID>.json` via snippet §7.
 
-2. Dispatch **one** `Task` call:
+**CHECKPOINT 8 — every context file written AND is a real object.**
+For each of the 5:
+- `[ -s "$OUT_DIR/vuln_${VULN_ID}.json" ]` (file is non-empty), AND
+- `jq -e 'type == "object"' "$OUT_DIR/vuln_${VULN_ID}.json" >/dev/null`
+  (content is a JSON object, not the literal `null` that snippet §7
+  emits when the id-filter matched nothing).
+- ❌ Either fails → print `Skipping <VULN_ID>: context-file
+  <missing | empty | not-an-object>.` and **drop that id from the
+  dispatch set**. Continue building the others.
 
-   ```
-   Task(
-     subagent_type="vulnerability-analyzer",
-     prompt=<<<
-       Vulnerability id: <VULN_ID>
-       Per-vuln context file: <skill_root>/.cache/vuln_<VULN_ID>.json
-       Scan target (resolved): <resolved-target-from-Phase-1>
-       Project root for reachability search: <abs path of the dir: scan target>     // always a real path; skill never passes "none"
-       Return your final synthesis block (see references/output-templates.md
-       "Lead-agent synthesis block"). The 3 sub-agents are yours to dispatch.
-     >>>
-   )
-   ```
+### Step 2 — Dispatch all surviving vulns in one message (parallel)
 
-   **CHECKPOINT 9 — synthesis received.**
-   - ✅ Returned a synthesis block starting with `### <VulnID>` →
-     append it verbatim to your inline output.
-   - ❌ Returned the validator's rejection sentence (shouldn't happen
-     — we passed a real id) → log one line `Analyzer rejected
-     <VULN_ID>: <returned text>.` and CONTINUE.
-   - ❌ Task errored out → log one line `Analyzer failed for
-     <VULN_ID>: <reason>.` and CONTINUE.
+Issue all `Task(vulnerability-analyzer)` calls **in a single message
+turn**, one per surviving id. The harness runs them concurrently.
 
-3. Do **not** issue the next Task until this one returns. (One
-   vuln-analyzer at a time keeps live sub-agent concurrency at 3 — the
-   parallel fan-out inside the analyzer.)
+Each Task prompt:
 
-**CHECKPOINT 10 — all top-5 attempted.**
-- Track the count of successes. If 0/5 succeeded, surface that as a
-  one-line warning so the user knows the inline output is degraded.
+```
+Task(
+  subagent_type="vulnerability-analyzer",
+  prompt=<<<
+    Vulnerability id: <VULN_ID>
+    Per-vuln context file: <skill_root>/.cache/vuln_<VULN_ID>.json
+    Scan target (resolved): <resolved-target-from-Phase-1>
+    Project root for reachability search: <abs path of the dir: scan target>
+    Return your final synthesis block (see Step 6 of vulnerability-analyzer.md
+    "Synthesize one block"). The 3 sub-agents are yours to dispatch.
+  >>>
+)
+```
+
+(Single-message multi-Task is the same pattern the lead agent itself
+uses for its 3 sub-agents — same mechanism, applied here for the 5
+top vulns.)
+
+### Step 3 — Collect, then emit IN SORT ORDER
+
+Wait for all dispatched Tasks to return. Then emit the synthesis
+blocks **in the same risk-sorted order as the top-5 table** —
+**not** in the order they happen to arrive back. The user reads the
+table and the syntheses as a paired list; arrival-order would be
+confusing.
+
+**CHECKPOINT 9 — per-vuln synthesis received.** Evaluate each
+returned Task independently:
+- ✅ Returned a synthesis block starting with `### <VulnID>` →
+  buffer it for the sort-ordered emit in Step 3.
+- ❌ Returned the validator's rejection sentence (shouldn't happen
+  — we passed a real id) → log one line `Analyzer rejected
+  <VULN_ID>: <returned text>.` Buffer a small placeholder block for
+  that id so the sort-ordered output still has all five rows
+  accounted for.
+- ❌ Task errored out → log one line `Analyzer failed for
+  <VULN_ID>: <reason>.` Same placeholder treatment.
+
+**CHECKPOINT 10 — overall success rate.**
+- Track the count of full successes across the 5. If 0/5 succeeded,
+  surface a one-line warning so the user knows the inline output is
+  degraded.
 - If 1+ succeeded, that's enough to proceed to Phase 5.
 
 ## Phase 5 — Closeout
