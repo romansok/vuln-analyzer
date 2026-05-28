@@ -47,7 +47,30 @@ You decide what to search and how. Artifacts name the package(s); symbols name w
 
 **Regex-escape the package name first.** Metacharacters to escape: `. + * ? ( ) [ ] { } ^ $ | \`. Otherwise scoped npm names (`@types/node`) or dotted Python names produce broken patterns.
 
-| Language / type | Patterns |
+#### Scope every grep call
+
+The project tree may be large (e.g. juice-shop has thousands of files). Don't grep blindly. **Every Grep call must:**
+
+1. **Filter by file extension matching the artifact's `language`.** Use Grep's `type` parameter (preferred — it covers common extensions) OR the `glob` parameter with the table below:
+
+| language | grep `type` | or glob |
+| --- | --- | --- |
+| `javascript` / `typescript` | `js`, `ts` | `**/*.{js,jsx,ts,tsx,mjs,cjs}` |
+| `python` | `py` | `**/*.py` |
+| `go` | `go` | `**/*.go` |
+| `java` | `java` | `**/*.{java,kt}` |
+| `ruby` | `ruby` | `**/*.rb` |
+| `rust` | `rust` | `**/*.rs` |
+| `php` | `php` | `**/*.php` |
+| `c` / `cpp` | `c`, `cpp` | `**/*.{c,cc,cpp,h,hpp}` |
+
+2. **Cap results.** Pass `head_limit: 50` (or smaller). You only need enough hits to classify; you cap `evidence[]` at 5 anyway.
+
+3. **Exclude noise dirs** via `glob` (when not using `type`): `!**/node_modules/**`, `!**/vendor/**`, `!**/dist/**`, `!**/build/**`, `!**/target/**`, `!**/.git/**`.
+
+#### Patterns by language (after the package name is regex-escaped)
+
+| Language / type | Import patterns |
 | --- | --- |
 | `javascript` / `npm` | `from ['"]<pkg>(/[^'"]+)?['"]` · `require\(['"]<pkg>['"]\)` · `import .* from ['"]<pkg>['"]` |
 | `python` / `pip` | `^\s*from\s+<pkg>(\.|\s)` · `^\s*import\s+<pkg>(\.|\s|$)` |
@@ -57,9 +80,11 @@ You decide what to search and how. Artifacts name the package(s); symbols name w
 | `rust` / `cargo` | `use\s+<pkg>(::|\s|;)` · `extern\s+crate\s+<pkg>` |
 | other | word-boundary grep of the package name |
 
-**Exclude noise:** `node_modules`, `vendor`, `dist`, `build`, `target`, `.git`. **Lockfiles and manifests (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `go.sum`, `Gemfile.lock`, `Cargo.lock`) are inventory, not usage.**
+**Lockfiles and manifests (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `go.sum`, `Gemfile.lock`, `Cargo.lock`) are inventory, not usage.** Don't include them in the scoped grep — handle them separately in Step 3.
 
 ### Step 2 — If `vulnerable_symbols[]` is non-empty: grep for those too
+
+Apply the same scope discipline as Step 1 (`type`/`glob` to filter by language, `head_limit: 50`, no noise dirs).
 
 Search shape by `kind`:
 - `function` / `method` / `api` → `<name>\(` , `\.<name>\(` (account for renamed imports).
