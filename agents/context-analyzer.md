@@ -39,8 +39,8 @@ ignore it.
 3. **Per CWE `n`:** `Read <playbook root>/CWE-<n>.md`. If the playbook root couldn't be resolved OR the file is missing AND `advisory_content` alone is too thin: WebFetch `https://cwe.mitre.org/data/definitions/<n>.html` — at most once per CWE.
 4. **Compose** (your raw material is `advisory_content` + the CWE playbook(s); the JSON `description` is **not** an input):
    - `what_it_is` — 1–2 plain-English sentences. No jargon.
-   - `attack_surface` — `network` / `api` / `local` / `file` / `supply-chain` (comma-list if multiple). Match the CVSS vector if available (`AV:N` → network).
-   - `blast_radius` — one paragraph: what an attacker can do with this.
+   - `attack_surface` — short string that names the **bucket** AND the **access requirement**, in this shape: `"network (unauthenticated remote)"` · `"network (authenticated user)"` · `"api (admin token required)"` · `"local (must already execute on the host)"` · `"file (must control a file the app reads)"` · `"supply-chain (must compromise a build dep)"`. Derive the access requirement from the CVSS vector when present: `AV:N/AC:L/PR:N` → unauthenticated remote; `AV:N/PR:L` → authenticated user; `AV:N/PR:H` → admin/privileged; `AV:L` → local. If multiple, comma-join: `"network (unauthenticated remote), api (any caller)"`.
+   - `blast_radius` — one paragraph: what an attacker can do with this once they've gotten the foothold above. Concrete consequences ("RCE on the worker process", "exfil the session cookie", "DoS the request handler") — not academic.
    - `example` — 4–8 lines, a story not a PoC. Pull from the playbook's "Typical attack pattern" when present.
    - `cwes_used` — `["CWE-XX", ...]` you actually used.
 
@@ -50,7 +50,7 @@ ignore it.
 <<<JSON>>>
 {
   "what_it_is": "...",
-  "attack_surface": "network|api|local|file|supply-chain|...",
+  "attack_surface": "network (unauthenticated remote) | network (authenticated user) | api (admin-only) | local | file | supply-chain | …",
   "blast_radius": "...",
   "example": "...",
   "cwes_used": ["CWE-79","CWE-94"]

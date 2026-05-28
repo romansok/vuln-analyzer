@@ -58,7 +58,17 @@ on any specific id.
   - Scan summary line — target, total matches, distinct vulns.
   - Severity counts — Critical / High / Medium / Low / Negligible (all five, including zeros).
   - **Top-5 markdown table** — sorted by risk, columns: `VulnID | Risk | Severity | CVSS | PURL(s) | Fix | Description`.
-  - **One synthesis block per top-2 finding** — what it is in plain English, whether it's reachable in your code (with file:line evidence), business impact, recommended action (bump version or workaround), and a 10-second "why this matters" example. Rows 3–5 in the table are not deeply analyzed by default — ask the standalone `vulnerability-analyzer` agent (`analyze <id>`) for any of them on demand.
+  - **One synthesis block per top-2 finding**, structured for fast triage:
+    - **Bug class** — the CWE(s).
+    - **Attack surface** — *who* can exploit this, *from where*, *with what access* (e.g. `network (unauthenticated remote)`, `api (admin token required)`, `local (must execute on the host)`). Copy-paste-ready into a Slack message.
+    - **What an attacker gets** — concrete consequence (RCE on the worker, exfil the session cookie, DoS the request handler) — not the mechanism.
+    - **Reachable in this codebase?** — verdict + file:line evidence when found.
+    - **What to do** — the upgrade path (bump / config-toggle / no-upstream-fix).
+    - **Workaround (always emitted)** — a concrete code or config snippet you can drop in **today** when bumping is blocked (peer-dep conflict, vendored fork, EOL framework, waiting on a PR review). Code block, language-fenced, plus the cost in one sentence.
+    - **Why it matters (10s explanation)** — one-line example a generalist developer follows.
+    - **Confidence** — High / Medium / Low + what would raise it.
+    
+    Rows 3–5 in the table are not deeply analyzed by default — ask the standalone `vulnerability-analyzer` agent (`analyze <id>`) for any of them on demand.
 
 - **On disk (only if total findings > 5):**
   - `vulnerabilites_report_<YYMMDD_HHMMSS>.md` in your invocation cwd. Contains **only** the full per-match markdown table — every artifact location for every finding. The absolute path is printed in chat.
