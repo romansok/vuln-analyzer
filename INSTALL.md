@@ -219,7 +219,10 @@ The skill should:
 3. Print a top-5 markdown table.
 4. If there are more than 5 findings, write
    `vulnerabilites_report_<ts>.md` in your cwd.
-5. Print a synthesis block per top-5 finding.
+5. Print a deep synthesis block for the **top 2** of those (rows 3-5
+   are shown in the table for awareness but not deeply analyzed;
+   ask the `vulnerability-analyzer` agent directly — *"analyze
+   <id>"* — for a deep analysis on any specific row).
 6. Print a closeout paragraph.
 
 ### Test 3 — rejection path

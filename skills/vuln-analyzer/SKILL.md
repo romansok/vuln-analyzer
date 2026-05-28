@@ -1,6 +1,6 @@
 ---
 name: vuln-analyzer
-description: Use when the user asks to scan a directory for vulnerabilities, find CVEs in a codebase, run grype on a project, or audit dependencies of a local repository. The skill scans local directories only — image refs, SBOMs, PURLs, and CPEs are rejected; for those, run grype directly or use the standalone vulnerability-analyzer agent with a specific advisory id. Ranks findings with grype's unified risk (falling back to CVSS and severity bucket), prints a top-5 markdown table inline, writes the full table to a timestamped report file when there are more than 5 findings, and dispatches the vulnerability-analyzer agent for each of the top 5 to produce a developer-readable analysis covering reachability, business impact, and remediation. Single entry point for "analyze the security of this codebase".
+description: Use when the user asks to scan a directory for vulnerabilities, find CVEs in a codebase, run grype on a project, or audit dependencies of a local repository. The skill scans local directories only — image refs, SBOMs, PURLs, and CPEs are rejected; for those, run grype directly or use the standalone vulnerability-analyzer agent with a specific advisory id. Ranks findings with grype's unified risk (falling back to CVSS and severity bucket), prints a top-5 markdown table inline, writes the full table to a timestamped report file when there are more than 5 findings, and dispatches the vulnerability-analyzer agent for the top 2 to produce a developer-readable analysis covering reachability, business impact, and remediation (rows 3-5 in the table are shown for awareness but not deeply analyzed — the standalone vulnerability-analyzer agent can be asked about any specific id on demand). Single entry point for "analyze the security of this codebase".
 ---
 
 # vuln-analyzer — orchestrator
@@ -53,8 +53,8 @@ is an **internal verification gate**, not user-facing output.
 
 The only user-visible output of a phase is the explicit render it
 documents (e.g., Phase 1's `Scanning: <target>` line, Phase 3's
-severity counts and top-5 table, Phase 4's per-vuln synthesis
-blocks, Phase 5's closeout). Everything else is silent verification.
+severity counts and top-5 table, Phase 4's 2 deep synthesis blocks,
+Phase 5's closeout). Everything else is silent verification.
 
 ---
 
@@ -188,38 +188,45 @@ Render inline, using the layouts from `references/output-templates.md`:
 - the top-5 markdown table,
 - if `$REPORT` was written, a one-line pointer: `Full report: <abs path>`.
 
-## Phase 4 — Deep analysis fan-out (top 5, in parallel)
+## Phase 4 — Deep analysis fan-out (top 2, in parallel)
 
-The five top vulns are independent — each gets its own context file
+`DEEP_ANALYSIS_N = 2`. **Only the top 2 distinct vuln IDs** (the
+first two rows of the top-5 table) get the deep analyzer pipeline.
+Rows 3–5 in the table are shown for awareness but **not** deeply
+analyzed — that's a deliberate cost/latency trade-off. If the user
+wants deeper analysis on any of those, the standalone
+`vulnerability-analyzer` agent handles per-id requests: *"analyze
+<id>"*.
+
+The 2 top vulns are independent — each gets its own context file
 and its own advisory fetch, and there's no shared state. Run them
 **concurrently**, not serially.
 
-### Step 1 — Write all five context files first
+### Step 1 — Write both context files first
 
-Extract the top-5 distinct vuln IDs (snippet §3). For each
-`$VULN_ID`, write its trimmed context to
+Take the **first 2** of the top-5 distinct vuln IDs from snippet §3.
+For each `$VULN_ID`, write its trimmed context to
 `$OUT_DIR/vuln_<VULN_ID>.json` via snippet §7.
 
 **CHECKPOINT 8 — every context file written AND is a real object.**
-For each of the 5:
+For each of the 2:
 - `[ -s "$OUT_DIR/vuln_${VULN_ID}.json" ]` (file is non-empty), AND
 - `jq -e 'type == "object"' "$OUT_DIR/vuln_${VULN_ID}.json" >/dev/null`
   (content is a JSON object, not the literal `null` that snippet §7
   emits when the id-filter matched nothing).
 - ❌ Either fails → print `Skipping <VULN_ID>: context-file
   <missing | empty | not-an-object>.` and **drop that id from the
-  dispatch set**. Continue building the others.
+  dispatch set**. Continue with the other.
 
-### Step 2 — Dispatch all surviving vulns in one message (parallel)
+### Step 2 — Dispatch both surviving vulns in one message (parallel)
 
 In a **single assistant turn**, issue every
 `Task(vulnerability-analyzer)` call simultaneously — a multi-tool-use
-message that bundles N Task invocations together (where N is the
-number of surviving ids, typically 5). The harness runs them
-concurrently.
+message that bundles 2 Task invocations together (or 1 if only one
+survived Checkpoint 8). The harness runs them concurrently.
 
 **You may emit at most ONE short status line** before dispatching, e.g.
-`Analyzing top 5 in parallel…`. Then dispatch. **Then say nothing
+`Analyzing top 2 in parallel…`. Then dispatch. **Then say nothing
 else until all Tasks return.**
 
 #### Forbidden between-call narration
@@ -227,13 +234,13 @@ else until all Tasks return.**
 Do **not** emit any of these (or close variants):
 
 - `Now I'll dispatch detailed analysis for each vulnerability (one at a time). Starting with the first:`
-- `Now dispatching the deep analyzer on each of the top 5, one at a time.`
-- `Analyzing vuln #1…`, `Moving to the next one…`, `Now on vuln #2 of 5…`
+- `Now dispatching the deep analyzer on each of the top 2, one at a time.`
+- `Analyzing vuln #1…`, `Moving to the next one…`, `Now on vuln #2 of 2…`
 - Any phrasing that implies serial / one-at-a-time / sequential dispatch.
 - Any per-vuln "starting…" / "done with…" status line.
 
 The model often narrates between tool calls out of habit. Resist it
-here. The user expects: top-5 table → one short status line → all 5
+here. The user expects: top-5 table → one short status line → both
 synthesis blocks (in sort order) emitted after the parallel batch
 returns. Anything in between is noise that misrepresents the
 execution shape.
@@ -260,26 +267,26 @@ top vulns.)
 
 ### Step 3 — Collect, then emit IN SORT ORDER
 
-Wait for all dispatched Tasks to return. Then emit the synthesis
-blocks **in the same risk-sorted order as the top-5 table** —
-**not** in the order they happen to arrive back. The user reads the
-table and the syntheses as a paired list; arrival-order would be
-confusing.
+Wait for both dispatched Tasks to return. Then emit the synthesis
+blocks **in the same risk-sorted order as the top-5 table** (i.e.
+the #1 row's synthesis first, the #2 row's synthesis second) — **not**
+in the order they happen to arrive back. The user reads the table
+and the syntheses as a paired list; arrival-order would be confusing.
 
 **CHECKPOINT 9 — per-vuln synthesis received.** Evaluate each
 returned Task independently:
 - ✅ Returned a synthesis block starting with `### <VulnID>` →
-  buffer it for the sort-ordered emit in Step 3.
+  buffer it for the sort-ordered emit.
 - ❌ Returned the validator's rejection sentence (shouldn't happen
   — we passed a real id) → log one line `Analyzer rejected
   <VULN_ID>: <returned text>.` Buffer a small placeholder block for
-  that id so the sort-ordered output still has all five rows
-  accounted for.
+  that id so the sort-ordered output still has both rows accounted
+  for.
 - ❌ Task errored out → log one line `Analyzer failed for
   <VULN_ID>: <reason>.` Same placeholder treatment.
 
 **CHECKPOINT 10 — overall success rate.**
-- Track the count of full successes across the 5. If 0/5 succeeded,
+- Track the count of full successes across the 2. If 0/2 succeeded,
   surface a one-line warning so the user knows the inline output is
   degraded.
 - If 1+ succeeded, that's enough to proceed to Phase 5.
@@ -309,7 +316,7 @@ syntheses were skipped/failed, mention that.
 | 7 | 3 | Report file written, header is a markdown table (>5 case) | Warn, continue |
 | 8 | 4 | Context file per vuln is a JSON object (not `null`) | Skip this vuln, continue |
 | 9 | 4 | Synthesis block returned | Log, continue |
-| 10 | 4 | ≥1 of 5 succeeded | Warn, continue |
+| 10 | 4 | ≥1 of 2 succeeded | Warn, continue |
 | 11 | 5 | Closeout rendered | — |
 
 ## Hard rules

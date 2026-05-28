@@ -1,10 +1,13 @@
 # vuln-analyzer
 
 An agentic vulnerability analyzer for Claude Code (and Cursor). Runs a
-Grype scan over a target, ranks findings by grype's unified risk, and
-dispatches a four-agent analysis pipeline for the top 5 — reachability,
-contextualization, remediation, and a synthesizing lead agent — to
-produce one developer-readable report per vulnerability.
+Grype scan over a target, ranks findings by grype's unified risk, shows
+a **top-5 table** in chat, and dispatches a four-agent analysis pipeline
+for the **top 2** — reachability, contextualization, remediation, and a
+synthesizing lead agent — to produce one developer-readable report per
+vulnerability. Rows 3–5 are listed for awareness; ask the standalone
+`vulnerability-analyzer` agent (e.g. `analyze GHSA-…`) for deep analysis
+on any specific id.
 
 > **Quick install:**
 > ```
@@ -55,7 +58,7 @@ produce one developer-readable report per vulnerability.
   - Scan summary line — target, total matches, distinct vulns.
   - Severity counts — Critical / High / Medium / Low / Negligible (all five, including zeros).
   - **Top-5 markdown table** — sorted by risk, columns: `VulnID | Risk | Severity | CVSS | PURL(s) | Fix | Description`.
-  - **One synthesis block per top-5 finding** — what it is in plain English, whether it's reachable in your code (with file:line evidence), business impact, recommended action (bump version or workaround), and a 10-second "why this matters" example.
+  - **One synthesis block per top-2 finding** — what it is in plain English, whether it's reachable in your code (with file:line evidence), business impact, recommended action (bump version or workaround), and a 10-second "why this matters" example. Rows 3–5 in the table are not deeply analyzed by default — ask the standalone `vulnerability-analyzer` agent (`analyze <id>`) for any of them on demand.
 
 - **On disk (only if total findings > 5):**
   - `vulnerabilites_report_<YYMMDD_HHMMSS>.md` in your invocation cwd. Contains **only** the full per-match markdown table — every artifact location for every finding. The absolute path is printed in chat.
@@ -67,10 +70,10 @@ SKILL.md (orchestrator)
   ├─ Scans with mcp__grype__scan (output_format=json)
   ├─ Caches JSON; reads it only via jq snippets
   ├─ Ranks, renders, writes the report file
-  └─ Dispatches 5 × Task(vulnerability-analyzer) IN PARALLEL — one per top-5 vuln
+  └─ Dispatches 2 × Task(vulnerability-analyzer) IN PARALLEL — one for each of the top-2 vulns
          │
          ▼
-     vulnerability-analyzer (lead)   ×5 concurrent instances
+     vulnerability-analyzer (lead)   ×2 concurrent instances
        1. Validates the input (CVE / GHSA / advisory URL).
        2. Resolves vuln context (cache file, fetched URL, or self-gathered).
        3. Extracts the vulnerable symbols (functions, classes, sinks,
@@ -82,10 +85,11 @@ SKILL.md (orchestrator)
             • remediation-analyzer   — primary fix + ranked workarounds, informed by the symbols.
        5. Synthesizes one developer-readable block and returns it.
 
-  The SKILL collects all 5 returned blocks, then emits them inline in the
-  risk-sorted order of the top-5 table (not arrival order). Two-tier
-  parallelism (5 leads × 3 sub-agents each) brings wall time down to
-  roughly the slowest single chain, not the sum.
+  The SKILL collects both returned blocks, then emits them inline in the
+  risk-sorted order of the top-5 table — first the #1 row's synthesis,
+  then the #2 row's. Two-tier parallelism (2 leads × 3 sub-agents each
+  = 6 concurrent sub-agents) brings wall time down to roughly the
+  slowest single chain.
 ```
 
 ## Repository layout
