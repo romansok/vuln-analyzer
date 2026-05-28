@@ -36,11 +36,11 @@ export function Hero() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-pretty text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
-            An agentic vulnerability analyzer that ranks what matters, finds it
-            in your code with{" "}
+            An agentic vulnerability analyzer that ranks what matters, traces
+            the <span className="text-[var(--color-text)]">attack surface</span>,
+            finds it in your code with{" "}
             <span className="text-[var(--color-text)]">file:line</span>{" "}
-            evidence, and tells you how to fix it &mdash; not just a wall of CVE
-            ids.
+            evidence, and tells you how to fix it.
           </p>
 
           <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
