@@ -13,12 +13,12 @@ export default function Home() {
     <main className="relative min-h-screen overflow-x-hidden bg-[var(--color-bg)] text-[var(--color-text)]">
       <Nav />
       <Hero />
-      <Problem />
-      <Solution />
-      <Install />
       <Usage />
-      <Architecture />
       <TerminalDemo />
+      <Architecture />
+      <Install />
+      <Solution />
+      <Problem />
       <Footer />
     </main>
   );

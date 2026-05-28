@@ -13,3 +13,5 @@ export const GH_INSTALL_SH = `${GH_REPO}/blob/main/install.sh`;
 export const GH_LICENSE = `${GH_REPO}/blob/main/LICENSE`;
 export const GH_RELEASES = `${GH_REPO}/releases`;
 export const GRYPE_MCP = "https://github.com/romansok/grype-mcp";
+export const GRYPE_MCP_README = "https://github.com/romansok/grype-mcp/blob/main/README-MCP.md";
+export const GRYPE_MCP_RELEASES = "https://github.com/romansok/grype-mcp/releases";

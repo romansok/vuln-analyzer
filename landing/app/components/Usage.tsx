@@ -20,6 +20,13 @@ const standalonePrompts: Prompt[] = [
   { text: "look at https://github.com/advisories/GHSA-xxxx-xxxx-xxxx" },
 ];
 
+const grypeOnlyPrompts: Prompt[] = [
+  { text: "Use grype to scan this directory.", note: "raw output, no agent" },
+  { text: "Run grype against alpine:3.10.6 and list only fixed vulns." },
+  { text: "Export grype results for my project as SARIF." },
+  { text: "Scan sbom:bom.json with grype." },
+];
+
 function PromptList({ prompts }: { prompts: Prompt[] }) {
   return (
     <ul className="space-y-3">
@@ -57,8 +64,9 @@ export function Usage() {
             Ask in <span className="gradient-text">plain English</span>.
           </h2>
           <p className="mt-4 text-pretty text-[var(--color-muted)]">
-            Once installed, any of these phrasings routes to the right entry point.
-            Scan a directory, or analyze a single advisory without a scan at all.
+            Three modes, composable. Run the full pipeline, analyze a single
+            advisory without a scan, or invoke grype on its own &mdash; same
+            assistant, same prompt box.
           </p>
         </motion.div>
 
@@ -73,20 +81,63 @@ export function Usage() {
             tabs={[
               {
                 id: "scan",
-                label: "Scan a project",
-                hint: "full pipeline",
-                content: <PromptList prompts={scanPrompts} />,
+                label: "Full pipeline",
+                hint: "scan + analyze",
+                content: (
+                  <div className="space-y-4">
+                    <ModeNote>
+                      <span className="font-mono text-[var(--color-text)]">
+                        vuln-analyzer
+                      </span>{" "}
+                      drives <span className="font-mono text-[var(--color-text)]">grype</span>:
+                      scan, rank, and analyze the top 5 with reachability + remediation.
+                    </ModeNote>
+                    <PromptList prompts={scanPrompts} />
+                  </div>
+                ),
               },
               {
                 id: "standalone",
                 label: "Analyze one CVE",
-                hint: "no scan needed",
-                content: <PromptList prompts={standalonePrompts} />,
+                hint: "vuln-analyzer alone",
+                content: (
+                  <div className="space-y-4">
+                    <ModeNote>
+                      The vulnerability-analyzer agent runs without a scan. No
+                      grype invocation, just plain-English explanation of one
+                      advisory.
+                    </ModeNote>
+                    <PromptList prompts={standalonePrompts} />
+                  </div>
+                ),
+              },
+              {
+                id: "grype",
+                label: "Raw grype scan",
+                hint: "grype-mcp alone",
+                content: (
+                  <div className="space-y-4">
+                    <ModeNote>
+                      Skip the analyzer and call grype directly. Useful for
+                      SARIF export, container images, or when you just want the
+                      vulnerability list, raw.
+                    </ModeNote>
+                    <PromptList prompts={grypeOnlyPrompts} />
+                  </div>
+                ),
               },
             ]}
           />
         </motion.div>
       </div>
     </section>
+  );
+}
+
+function ModeNote({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-xs leading-relaxed text-[var(--color-muted)]">
+      {children}
+    </p>
   );
 }

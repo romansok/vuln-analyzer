@@ -5,11 +5,11 @@ import { Github, ShieldHalf } from "lucide-react";
 import { cn, GH_REPO } from "@/lib/util";
 
 const sections = [
-  { id: "why", label: "Why" },
-  { id: "features", label: "Features" },
-  { id: "install", label: "Install" },
   { id: "usage", label: "Usage" },
   { id: "architecture", label: "Architecture" },
+  { id: "install", label: "Install" },
+  { id: "features", label: "Features" },
+  { id: "why", label: "Why" },
 ];
 
 export function Nav() {

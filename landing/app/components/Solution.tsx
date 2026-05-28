@@ -64,8 +64,7 @@ export function Solution() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <span className="eyebrow">What you get</span>
-          <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Built for <span className="gradient-text">developers who ship</span>,
             not security dashboards.
           </h2>
