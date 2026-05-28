@@ -183,25 +183,35 @@ jq -r '...snippet 4 or 5...' "$SCAN_JSON" | awk '...one-liner above...'
 
 ## 7) Per-vuln trimmed JSON (writes `.cache/vuln_<id>.json`)
 
-> **Note on the `description` field below.** The grype JSON's `description` is typically a one-line label (e.g. `"vm2 Sandbox Escape vulnerability"`) — fine for the SKILL's human-readable table, **never used by the agents for analysis**. The lead `vulnerability-analyzer` agent fetches the real advisory text from `data_source`/`advisory_urls[]` into an in-memory `advisory_content` field and strips `description` before fanning out to sub-agents. We still emit `description` here because (a) it's harmless and (b) it's useful for human inspection of the cache file. See `agents/vulnerability-analyzer.md` §"Two kinds of 'description'".
+> **Slim schema.** This file is read by 6 sub-agents per scan (2 vulns × 3 sub-agents). The schema below carries **only** what the agents actually consume. Dropped from the raw grype match (because nothing reads them):
+>
+> - `risk` (only the SKILL needs it, for sorting — it has it before writing this file)
+> - `description` (the short label; agents fetch the real text into `advisory_content` per the two-description rule)
+> - `epss` (no agent uses it)
+> - `relatedVulnerabilities` (no agent uses the related entries; the underlying CVE is reachable from `data_source`/`advisory_urls` if needed)
+>
+> Trimmed in-place:
+>
+> - `cvss[]` → keep just the vector string + base score from the first entry (context-analyzer needs `AV:N` etc. for attack-surface inference; nothing reads the rest of the structure)
+> - `cwes[]` → keep just the CWE-id strings (the wrapping objects with `cve`, `source`, `type` are unused)
+>
+> If you ever add a sub-agent that does need any of these, re-add the field here. Otherwise: smaller file → less tokens × 6 reads per scan.
 
 ```bash
 jq --arg id "$VULN_ID" '
   .matches
   | map(select(.vulnerability.id == $id)) as $ms
   | if ($ms | length) == 0 then null
-    else {
-      id: $ms[0].vulnerability.id,
-      severity: $ms[0].vulnerability.severity,
-      risk: $ms[0].vulnerability.risk,
-      description: $ms[0].vulnerability.description,
-      cvss: $ms[0].vulnerability.cvss,
-      epss: $ms[0].vulnerability.epss,
-      cwes: $ms[0].vulnerability.cwes,
-      fix: $ms[0].vulnerability.fix,
-      advisory_urls: $ms[0].vulnerability.urls,
-      data_source: $ms[0].vulnerability.dataSource,
-      related: $ms[0].relatedVulnerabilities,
+    else ($ms[0].vulnerability) as $v
+    | {
+      id: $v.id,
+      severity: $v.severity,
+      cvss_vector: ($v.cvss[0].vector // null),
+      cvss_score:  ($v.cvss[0].metrics.baseScore // null),
+      cwes:        [$v.cwes[]?.cwe] | unique,
+      fix:         $v.fix,
+      advisory_urls: $v.urls,
+      data_source: $v.dataSource,
       artifacts: [$ms[] | {
         purl: .artifact.purl,
         name: .artifact.name,

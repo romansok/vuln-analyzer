@@ -53,7 +53,7 @@ For each:
 
 ### Step 3 — Per-CWE hints
 
-For each CWE on the vuln, Read the playbook entry. Try these locations in order; use the first that resolves:
+The context's `cwes[]` is already a list of strings like `"CWE-74"`. For each entry, Read the playbook entry — try these locations in order; use the first that resolves:
 
 - `~/.claude/skills/vuln-analyzer/references/cwe/CWE-<n>.md`        (Claude Code, user-level)
 - `~/.cursor/skills/vuln-analyzer/references/cwe/CWE-<n>.md`        (Cursor, user-level)

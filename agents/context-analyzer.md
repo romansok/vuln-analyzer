@@ -30,7 +30,7 @@ ignore it.
 
 ## Method
 
-1. **Pull CWE numbers** from `cwes[].cwe` (drop the `CWE-` prefix).
+1. **Pull CWE numbers** from `cwes[]` (the array is already a list of strings like `"CWE-79"`; drop the `CWE-` prefix to get `n`).
 2. **Resolve the CWE playbook root.** The skill installs to either Claude or Cursor — find it. Try in order, use the first whose `index.md` you can Read:
    - `~/.claude/skills/vuln-analyzer/references/cwe/`        (Claude Code, user-level — most common)
    - `~/.cursor/skills/vuln-analyzer/references/cwe/`        (Cursor, user-level)

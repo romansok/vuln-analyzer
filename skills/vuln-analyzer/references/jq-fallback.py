@@ -178,24 +178,27 @@ def cmd_full_table(scan):
 
 
 def cmd_vuln(scan, vuln_id):
+    # Slim schema — see jq-snippets.md §7 for what's kept vs dropped
+    # and why. Stays in sync with the jq variant.
     ms = [m for m in scan.get("matches", [])
           if (m.get("vulnerability") or {}).get("id") == vuln_id]
     if not ms:
         print("null")
         return
     head = ms[0].get("vulnerability") or {}
+    cvss_arr = head.get("cvss") or []
+    cvss0 = cvss_arr[0] if cvss_arr else {}
     out = {
         "id": head.get("id"),
         "severity": head.get("severity"),
-        "risk": head.get("risk"),
-        "description": head.get("description"),
-        "cvss": head.get("cvss"),
-        "epss": head.get("epss"),
-        "cwes": head.get("cwes"),
+        "cvss_vector": cvss0.get("vector"),
+        "cvss_score": (cvss0.get("metrics") or {}).get("baseScore"),
+        "cwes": sorted({(c or {}).get("cwe")
+                        for c in (head.get("cwes") or [])
+                        if (c or {}).get("cwe")}),
         "fix": head.get("fix"),
         "advisory_urls": head.get("urls"),
         "data_source": head.get("dataSource"),
-        "related": ms[0].get("relatedVulnerabilities"),
         "artifacts": [
             {
                 "purl": (m.get("artifact") or {}).get("purl"),
