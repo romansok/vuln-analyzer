@@ -47,8 +47,8 @@ duplicate them — one source of truth.
 The SKILL never renders synthesis blocks itself; it only appends what
 the lead agent returns. So no template lives here.
 
-## Closeout paragraph (printed after all 5 syntheses)
+## Closeout paragraph (printed after the 2 deep syntheses)
 
 ```
-**Where to start.** <Name 1–2 specific findings and exactly what to do first, in plain English. Reference the report file path: `<absolute/path/vulnerabilites_report_<ts>.md>`. If >5 vulns, mention how many remain in the file.>
+**Where to start.** <Name 1–2 specific findings and exactly what to do first, in plain English. Reference the report file path: `<absolute/path/vulnerabilites_report_<ts>.md>`. If >5 vulns, mention how many remain in the file. If the user wants deep analysis on any of the table's other rows (#3, #4, #5), point them at the standalone agent: "ask 'analyze <id>' to get a full synthesis for any specific vuln.">
 ```
