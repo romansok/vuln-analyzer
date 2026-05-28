@@ -225,8 +225,10 @@ jq --arg id "$VULN_ID" '
 ' "$SCAN_JSON" > "$OUT_DIR/vuln_${VULN_ID}.json"
 ```
 
-Note: the trimmed JSON includes `related[]` so the lead agent can recover
-the Primary NVD CVSS when the main entry is GHSA-only.
+Note: the slim schema deliberately omits `related[]` and `epss`. If a
+sub-agent ever needs the underlying CVE (e.g. when the match id is a
+GHSA), the lead agent can derive it from `data_source` (which often
+contains the CVE id) or by fetching `data_source` directly.
 
 ## 8) Get the canonical CVE id when the match id is a GHSA
 
