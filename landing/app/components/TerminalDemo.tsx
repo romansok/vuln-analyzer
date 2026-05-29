@@ -8,6 +8,7 @@ import {
   PROMPT_PREFIX,
   type TerminalLine,
 } from "@/lib/terminal-script";
+import { SectionLabel } from "./SectionLabel";
 
 /* -------------------------------------------------------------------------
  * Script
@@ -85,87 +86,91 @@ const Table = (
     <div className={C.muted}>
       ├──────────────────────────┼───────┼──────────┼──────────────────────┼──────────┤
     </div>
-    <TableRow id="GHSA-whpj-8f3w-67p5" risk="61.57" sev="Critical" sevClass={C.critical} purl="vm2@3.9.17" fix="3.9.18" />
-    <TableRow id="GHSA-g644-9gfx-q4q4" risk="34.12" sev="High" sevClass={C.high} purl="lodash@4.17.20" fix="4.17.21" />
-    <TableRow id="GHSA-jv3p-37xc-vp9j" risk="19.43" sev="High" sevClass={C.high} purl="marked@0.7.0" fix="4.0.10" />
-    <TableRow id="CVE-2023-26136" risk="14.92" sev="Medium" sevClass={C.med} purl="tough-cookie@2.5.0" fix="4.1.3" />
-    <TableRow id="GHSA-rp65-9cf3-cjxr" risk="11.04" sev="Medium" sevClass={C.med} purl="nth-check@1.0.2" fix="2.0.1" />
+    <TableRow id="GHSA-whpj-8f3w-67p5" risk="61.0" sev="Critical" sevClass={C.critical} purl="vm2@3.9.17" fix="3.9.18" />
+    <TableRow id="GHSA-g644-9gfx-q4q4" risk="34.2" sev="Critical" sevClass={C.critical} purl="vm2@3.9.17" fix="—" />
+    <TableRow id="GHSA-c7hr-j4mj-j2w6" risk="33.7" sev="Critical" sevClass={C.critical} purl="jsonwebtoken@0.1.0" fix="4.2.2" />
+    <TableRow id="GHSA-jf85-cpcp-j695" risk="13.4" sev="Critical" sevClass={C.critical} purl="lodash@2.4.2" fix="4.17.12" />
+    <TableRow id="GHSA-cchq-frgv-rjh5" risk="4.5" sev="Critical" sevClass={C.critical} purl="vm2@3.9.17" fix="3.10.0" />
     <div className={C.muted}>
       └──────────────────────────┴───────┴──────────┴──────────────────────┴──────────┘
     </div>
   </div>
 );
 
+// Label column padded to 16 chars so the values align in a clean gutter.
 const SynthesisIntro = (
   <div className="mt-2">
     <span className={C.muted}>### </span>
     <span className={C.text}>GHSA-whpj-8f3w-67p5</span>
     <span className={C.muted}> — </span>
-    <span className={`${C.text} font-medium`}>vm2 Sandbox Escape</span>
+    <span className={`${C.text} font-medium`}>vm2 sandbox escape (host RCE)</span>
   </div>
 );
 
 const SynthesisBugClass = (
   <div>
-    <span className={C.cyan}>Bug class:  </span>
+    <span className={C.cyan}>{"Bug class       "}</span>
     <span className={C.text}>CWE-74</span>
-    <span className={C.muted}> (Injection)</span>
+    <span className={C.muted}> · Injection</span>
+  </div>
+);
+
+const SynthesisAttackSurface = (
+  <div>
+    <span className={C.cyan}>{"Attack surface  "}</span>
+    <span className={C.accent}>POST /rest/chatbot/respond</span>
+    <span className={C.muted}> · authenticated user · network</span>
+    <span className={C.critical}> (CVSS 9.8)</span>
   </div>
 );
 
 const SynthesisReachable = (
   <div>
-    <span className={C.cyan}>Reachable?  </span>
-    <span className={`${C.ok} font-medium`}>✓ Direct import</span>
-    <span> at </span>
-    <span className={`${C.accent}`}>src/sandbox.js:12</span>
-    <span className={C.muted}> (Proxy() pattern at :45)</span>
+    <span className={C.cyan}>{"Reachable?      "}</span>
+    <span className={`${C.ok} font-medium`}>✓ Direct</span>
+    <span className={C.muted}> — </span>
+    <span className={C.accent}>routes/chatbot.ts:104</span>
+    <span className={C.muted}> → juicy-chat-bot → vm2@3.9.17</span>
   </div>
-);
-
-const SynthesisFix = (
-  <>
-    <div>
-      <span className={C.cyan}>Fix:        </span>
-      <span>Bump </span>
-      <span className={C.text}>vm2</span>
-      <span> → </span>
-      <span className={`${C.ok} font-medium`}>3.9.18</span>
-      <span className={C.muted}> (released May 2023).</span>
-    </div>
-    <div>
-      <span className={C.muted}>            Workaround: move vm2 behind a subprocess boundary.</span>
-    </div>
-  </>
 );
 
 const SynthesisImpact = (
   <div>
-    <span className={C.cyan}>Impact:     </span>
-    <span>RCE via Proxy-handler escape from the sandbox.</span>
+    <span className={C.cyan}>{"Impact          "}</span>
+    <span>Full remote code execution on the Node host process.</span>
+  </div>
+);
+
+const SynthesisFix = (
+  <div>
+    <span className={C.cyan}>{"Fix             "}</span>
+    <span className={C.muted}>overrides </span>
+    <span className={C.text}>{'{ "vm2": ">=3.9.18" }'}</span>
+    <span className={C.muted}> → npm install</span>
   </div>
 );
 
 const SynthesisConfidence = (
   <div>
-    <span className={C.cyan}>Confidence: </span>
-    <span className={`${C.ok}`}>High</span>
+    <span className={C.cyan}>{"Confidence      "}</span>
+    <span className={C.ok}>High</span>
   </div>
 );
 
 const SCRIPT: TerminalLine[] = [
   { type: "type", text: `${PROMPT_PREFIX}scan this codebase for vulnerabilities`, cls: C.text, pause: 380 },
-  { type: "type", text: `▸ Scanning: dir:/home/dev/juice-shop`, cls: C.muted, pause: 280 },
-  { type: "type", text: `▸ 181 matches · 42 distinct vulns`, cls: C.muted, pause: 120 },
-  { type: "type", text: `▸ Critical 24 · High 84 · Medium 68 · Low 5`, cls: C.muted, pause: 360 },
+  { type: "type", text: `▸ Scanned: dir:/Users/dev/juice-shop`, cls: C.muted, pause: 280 },
+  { type: "type", text: `▸ 182 matches · 126 distinct vulns`, cls: C.muted, pause: 120 },
+  { type: "type", text: `▸ Critical 24 · High 84 · Medium 69 · Low 5`, cls: C.muted, pause: 360 },
   { type: "blank", pause: 80 },
   { type: "instant", node: Table, pause: 600 },
   { type: "blank", pause: 80 },
-  { type: "instant", node: SynthesisIntro, pause: 200 },
+  { type: "instant", node: SynthesisIntro, pause: 220 },
   { type: "instant", node: SynthesisBugClass, pause: 200 },
+  { type: "instant", node: SynthesisAttackSurface, pause: 340 },
   { type: "instant", node: SynthesisReachable, pause: 320 },
+  { type: "instant", node: SynthesisImpact, pause: 240 },
   { type: "instant", node: SynthesisFix, pause: 240 },
-  { type: "instant", node: SynthesisImpact, pause: 220 },
   { type: "instant", node: SynthesisConfidence, pause: 200 },
 ];
 
@@ -276,12 +281,13 @@ export function TerminalDemo() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <span className="eyebrow">Live output</span>
+          <SectionLabel index="02" label="Live output" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             See it on a real <span className="gradient-text">juice-shop</span>.
           </h2>
           <p className="mt-4 text-pretty text-[var(--color-muted)]">
-            Same prompt your developers would type. Same answer they need to act on.
+            One prompt &mdash; and every finding comes back with its attack
+            surface, reachability, and a one-step fix.
           </p>
         </motion.div>
 

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { MessageSquare } from "lucide-react";
 import { Tabs } from "./Tabs";
+import { SectionLabel } from "./SectionLabel";
 
 type Prompt = { text: string; note?: string };
 
@@ -59,9 +60,9 @@ export function Usage() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <span className="eyebrow">Usage</span>
+          <SectionLabel index="01" label="Usage" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Ask in <span className="gradient-text">plain English</span>.
+            Ask in <span className="gradient-text">natural language</span>.
           </h2>
           <p className="mt-4 text-pretty text-[var(--color-muted)]">
             Three modes, composable. Run the full pipeline, analyze a single
@@ -104,8 +105,8 @@ export function Usage() {
                   <div className="space-y-4">
                     <ModeNote>
                       The vulnerability-analyzer agent runs without a scan. No
-                      grype invocation, just plain-English explanation of one
-                      advisory.
+                      grype invocation &mdash; just a written analysis of a
+                      single advisory.
                     </ModeNote>
                     <PromptList prompts={standalonePrompts} />
                   </div>

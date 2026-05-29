@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Github, Sparkles } from "lucide-react";
+import { ArrowRight, Github } from "lucide-react";
 import { GH_REPO } from "@/lib/util";
 
 export function Hero() {
@@ -14,7 +14,7 @@ export function Hero() {
       <div className="hero-orb" aria-hidden />
       {/* Faint grid behind content. */}
       <div
-        className="bg-grid pointer-events-none absolute inset-0 -z-10 opacity-[0.35]"
+        className="bg-grid pointer-events-none absolute inset-0 -z-10 opacity-20"
         aria-hidden
       />
 
@@ -25,9 +25,9 @@ export function Hero() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="flex flex-col items-start"
         >
-          <span className="eyebrow">
-            <Sparkles className="h-3 w-3" />
-            For Claude Code &amp; Cursor
+          <span className="hero-tag">
+            <span className="dot" aria-hidden />
+            vuln-analyzer · for Claude Code &amp; Cursor
           </span>
 
           <h1 className="mt-6 max-w-4xl text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-balance sm:text-6xl md:text-7xl">

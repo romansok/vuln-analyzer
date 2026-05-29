@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
+import { SectionLabel } from "./SectionLabel";
 
 type Agent = {
   name: string;
@@ -19,7 +20,7 @@ const agents: Agent[] = [
   },
   {
     name: "context-analyzer",
-    role: "Explains the CWE class in plain English from a local playbook.",
+    role: "Explains the CWE class in clear prose from a local playbook.",
     returns: "what-it-is, attack-surface, blast-radius",
     color: "steel",
   },
@@ -48,7 +49,7 @@ export function Architecture() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <span className="eyebrow">Architecture</span>
+          <SectionLabel index="03" label="Architecture" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             Four agents. <span className="gradient-text">Parallel. Specialized.</span>
           </h2>
@@ -64,7 +65,7 @@ export function Architecture() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          className="surface-card mt-14 overflow-hidden p-6 sm:p-10"
+          className="surface-card tick mt-14 overflow-hidden p-6 sm:p-10"
         >
           <Diagram />
         </motion.div>

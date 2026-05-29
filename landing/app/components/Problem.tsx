@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { AlertOctagon, HelpCircle, Check } from "lucide-react";
+import { SectionLabel } from "./SectionLabel";
 
 const cards = [
   {
@@ -41,8 +42,8 @@ const cards = [
     body: (
       <>
         Top 5 by real risk. <span className="text-[var(--color-text)]">file:line</span>{" "}
-        evidence for reachability. CWE in plain English. Primary fix plus ranked
-        workarounds with effort estimates.
+        evidence for reachability. The attack surface and CWE explained. Primary
+        fix plus ranked workarounds with effort estimates.
       </>
     ),
   },
@@ -85,7 +86,7 @@ export function Problem() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <span className="eyebrow">The problem</span>
+          <SectionLabel index="06" label="Why" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             Scanners shout. They don&apos;t <span className="gradient-text">explain</span>.
           </h2>

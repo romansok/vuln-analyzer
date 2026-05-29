@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Download, ExternalLink, FileText, Terminal } from "lucide-react";
 import { CodeBlock } from "./CodeBlock";
 import { Tabs } from "./Tabs";
+import { SectionLabel } from "./SectionLabel";
 import {
   GH_INSTALL_DOC,
   GH_INSTALL_SH,
@@ -52,7 +53,7 @@ export function Install() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <span className="eyebrow">Install</span>
+          <SectionLabel index="04" label="Install" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             Two pieces, <span className="gradient-text">in order</span>.
           </h2>

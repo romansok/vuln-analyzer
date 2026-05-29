@@ -102,20 +102,100 @@ body {
   padding-bottom: clamp(4rem, 8vw, 7rem);
 }
 
-/* Eyebrow / pill */
-.eyebrow {
-  display: inline-flex;
+/* -------------------------------------------------------------
+   Section index label — an editorial "NN —— LABEL ————" rule.
+   Replaces generic pill eyebrows; reads like a spec sheet / man
+   page header. The hairline extends to the right of the label.
+   ------------------------------------------------------------- */
+.section-label {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  background: color-mix(in oklab, var(--color-accent-1) 12%, transparent);
-  border: 1px solid color-mix(in oklab, var(--color-accent-1) 30%, transparent);
-  color: color-mix(in oklab, var(--color-accent-1) 70%, var(--color-text));
+  gap: 0.85rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
+  color: var(--color-muted);
+}
+.section-label .idx {
+  color: var(--color-accent-1);
+  font-weight: 500;
+}
+.section-label .lbl {
+  white-space: nowrap;
+}
+.section-label .line {
+  height: 1px;
+  flex: 1 1 auto;
+  background: linear-gradient(
+    to right,
+    var(--color-border-strong),
+    transparent
+  );
+}
+
+/* Hero "system status" tag — monospace, leading live dot. */
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.4rem;
+  background: color-mix(in oklab, var(--color-surface) 80%, transparent);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+.hero-tag .dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--color-success);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-success) 70%, transparent);
+  animation: status-pulse 2.4s ease-out infinite;
+}
+
+@keyframes status-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-success) 60%, transparent); }
+  70% { box-shadow: 0 0 0 6px color-mix(in oklab, var(--color-success) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-success) 0%, transparent); }
+}
+
+/* -------------------------------------------------------------
+   Register ticks — viewfinder corner brackets. A recurring motif
+   that frames the terminal + key cards like a measuring instrument.
+   ------------------------------------------------------------- */
+.tick {
+  position: relative;
+}
+.tick::before,
+.tick::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-color: color-mix(in oklab, var(--color-accent-1) 55%, transparent);
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.tick::before {
+  top: 8px;
+  left: 8px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+.tick::after {
+  bottom: 8px;
+  right: 8px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+}
+.tick:hover::before,
+.tick:hover::after {
+  opacity: 1;
 }
 
 /* Ambient blue glow behind the hero. Single-hue radial fade — not a
