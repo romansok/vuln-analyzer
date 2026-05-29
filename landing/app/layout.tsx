@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const inter = Inter({
@@ -68,7 +69,20 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        {/*
+          GoatCounter — privacy-friendly, cookieless analytics.
+          The dashboard lives at https://vuln-analyzer.goatcounter.com (login
+          required if you set "Data access: only logged-in users"). count.js
+          automatically skips localhost, so dev visits are never counted.
+        */}
+        <Script
+          data-goatcounter="https://vuln-analyzer.goatcounter.com/count"
+          src="https://gc.zgo.at/count.js"
+          strategy="afterInteractive"
+        />
+      </body>
     </html>
   );
 }
