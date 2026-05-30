@@ -82,7 +82,7 @@ export function Solution() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <SectionLabel index="05" label="Features" />
+          <SectionLabel index="04" label="Features" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             Built for <span className="gradient-text">developers who ship</span>,
             not security dashboards.

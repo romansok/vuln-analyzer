@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Github } from "lucide-react";
 import { GH_REPO } from "@/lib/util";
+import { TerminalDemo } from "./TerminalDemo";
 
 export function Hero() {
   return (
@@ -78,6 +79,10 @@ export function Hero() {
             </li>
           </ul>
         </motion.div>
+
+        {/* The live terminal demo is the hero's centerpiece — it sits
+            directly under the value prop, no section heading. */}
+        <TerminalDemo />
       </div>
     </section>
   );

@@ -60,7 +60,7 @@ export function Usage() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <SectionLabel index="01" label="Usage" />
+          <SectionLabel index="02" label="Usage" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             Ask in <span className="gradient-text">natural language</span>.
           </h2>

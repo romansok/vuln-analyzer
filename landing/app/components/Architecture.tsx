@@ -49,7 +49,7 @@ export function Architecture() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <SectionLabel index="03" label="Architecture" />
+          <SectionLabel index="01" label="Architecture" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             Four agents. <span className="gradient-text">Parallel. Specialized.</span>
           </h2>

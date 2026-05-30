@@ -5,7 +5,6 @@ import { Solution } from "./components/Solution";
 import { Architecture } from "./components/Architecture";
 import { Install } from "./components/Install";
 import { Usage } from "./components/Usage";
-import { TerminalDemo } from "./components/TerminalDemo";
 import { Footer } from "./components/Footer";
 
 export default function Home() {
@@ -13,9 +12,8 @@ export default function Home() {
     <main className="relative min-h-screen overflow-x-hidden bg-[var(--color-bg)] text-[var(--color-text)]">
       <Nav />
       <Hero />
-      <Usage />
-      <TerminalDemo />
       <Architecture />
+      <Usage />
       <Install />
       <Solution />
       <Problem />

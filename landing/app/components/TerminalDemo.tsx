@@ -8,7 +8,6 @@ import {
   PROMPT_PREFIX,
   type TerminalLine,
 } from "@/lib/terminal-script";
-import { SectionLabel } from "./SectionLabel";
 
 /* -------------------------------------------------------------------------
  * Script
@@ -272,71 +271,49 @@ export function TerminalDemo() {
   };
 
   return (
-    <section className="section-pad relative">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="max-w-2xl"
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+      className="terminal mt-12 w-full sm:mt-16"
+    >
+      <div className="terminal-header">
+        <span className="terminal-dot bg-[#f97373]" />
+        <span className="terminal-dot bg-[#f7c948]" />
+        <span className="terminal-dot bg-[#7bd88f]" />
+        <span className="ml-3 font-mono text-[0.72rem] uppercase tracking-widest text-[var(--color-muted-2)]">
+          ~/juice-shop · vuln-analyzer
+        </span>
+        <button
+          type="button"
+          onClick={replay}
+          aria-label="Replay demo"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-[0.72rem] uppercase tracking-widest text-[var(--color-muted)] transition-colors hover:border-[var(--color-border)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]"
         >
-          <SectionLabel index="02" label="Live output" />
-          <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
-            See it on a real <span className="gradient-text">juice-shop</span>.
-          </h2>
-          <p className="mt-4 text-pretty text-[var(--color-muted)]">
-            One prompt &mdash; and every finding comes back with its attack
-            surface, reachability, and a one-step fix.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="terminal mt-10"
-        >
-          <div className="terminal-header">
-            <span className="terminal-dot bg-[#f97373]" />
-            <span className="terminal-dot bg-[#f7c948]" />
-            <span className="terminal-dot bg-[#7bd88f]" />
-            <span className="ml-3 font-mono text-[0.72rem] uppercase tracking-widest text-[var(--color-muted-2)]">
-              ~/juice-shop · vuln-analyzer
-            </span>
-            <button
-              type="button"
-              onClick={replay}
-              aria-label="Replay demo"
-              className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-[0.72rem] uppercase tracking-widest text-[var(--color-muted)] transition-colors hover:border-[var(--color-border)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]"
-            >
-              <RotateCcw className="h-3 w-3" />
-              <span>{done ? "replay" : "running"}</span>
-            </button>
-          </div>
-
-          <div className="terminal-body">
-            {SCRIPT.slice(0, completed).map((line, i) => (
-              <LineView key={`done-${version}-${i}`} line={line} />
-            ))}
-            {!done && completed < SCRIPT.length ? (
-              <CurrentLine
-                line={SCRIPT[completed]}
-                partial={partial}
-                showCursor={SCRIPT[completed]?.type === "type"}
-              />
-            ) : null}
-            {done ? (
-              <div className="mt-4">
-                <span className={C.prompt}>$ </span>
-                <span className="terminal-cursor" />
-              </div>
-            ) : null}
-          </div>
-        </motion.div>
+          <RotateCcw className="h-3 w-3" />
+          <span>{done ? "replay" : "running"}</span>
+        </button>
       </div>
-    </section>
+
+      <div className="terminal-body">
+        {SCRIPT.slice(0, completed).map((line, i) => (
+          <LineView key={`done-${version}-${i}`} line={line} />
+        ))}
+        {!done && completed < SCRIPT.length ? (
+          <CurrentLine
+            line={SCRIPT[completed]}
+            partial={partial}
+            showCursor={SCRIPT[completed]?.type === "type"}
+          />
+        ) : null}
+        {done ? (
+          <div className="mt-4">
+            <span className={C.prompt}>$ </span>
+            <span className="terminal-cursor" />
+          </div>
+        ) : null}
+      </div>
+    </motion.div>
   );
 }
 

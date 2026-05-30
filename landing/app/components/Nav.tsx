@@ -5,8 +5,8 @@ import { Github, ShieldHalf } from "lucide-react";
 import { cn, GH_REPO } from "@/lib/util";
 
 const sections = [
-  { id: "usage", label: "Usage" },
   { id: "architecture", label: "Architecture" },
+  { id: "usage", label: "Usage" },
   { id: "install", label: "Install" },
   { id: "features", label: "Features" },
   { id: "why", label: "Why" },

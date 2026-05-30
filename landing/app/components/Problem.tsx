@@ -86,7 +86,7 @@ export function Problem() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <SectionLabel index="06" label="Why" />
+          <SectionLabel index="05" label="Why" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             Scanners shout. They don&apos;t <span className="gradient-text">explain</span>.
           </h2>

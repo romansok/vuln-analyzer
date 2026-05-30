@@ -53,7 +53,7 @@ export function Install() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          <SectionLabel index="04" label="Install" />
+          <SectionLabel index="03" label="Install" />
           <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
             Two pieces, <span className="gradient-text">in order</span>.
           </h2>
